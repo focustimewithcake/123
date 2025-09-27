@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Mindmap Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>✨ AI Mindmap Generator ✨</h1>
+
+    <!-- Input văn bản -->
+    <textarea id="inputText" placeholder="Nhập văn bản tại đây..."></textarea>
+
+    <!-- Upload ảnh -->
+    <input type="file" id="inputImages" accept="image/*" multiple>
+
+    <!-- Nút tạo sơ đồ -->
+    <button id="generateBtn">Tạo sơ đồ tư duy</button>
+
+    <!-- Khu vực hiển thị mindmap -->
+    <div id="mindmap"></div>
+  </div>
+
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <script src="mindmap.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
