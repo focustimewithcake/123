@@ -761,18 +761,44 @@
                     resultSection.scrollIntoView({ behavior: 'smooth' });
                     
                     showStatus('Đã tạo dàn ý thành công với AI!', 'success');
-                    
-                } catch (error) {
-                    console.error('Lỗi khi phân tích với AI:', error);
-                    showStatus('Lỗi: ' + error.message, 'error');
-                } finally {
-                    // Ẩn tiến trình và kích hoạt lại nút
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-                        generateBtn.disabled = false;
-                    }, 1000);
-                }
-            });
+           // Trong phần generateBtn click event, thay thế catch block bằng:
+} catch (error) {
+    console.error('Lỗi khi phân tích với AI:', error);
+    
+    let userMessage = error.message;
+    if (error.message.includes('429')) {
+        userMessage = 'Tạm thời quá tải. Vui lòng đợi 30 giây rồi thử lại.';
+        
+        // Disable nút trong 30 giây
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-clock"></i> Đợi 30 giây...';
+        
+        let countdown = 30;
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            generateBtn.innerHTML = `<i class="fas fa-clock"></i> Đợi ${countdown} giây...`;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-brain"></i> Phân tích AI & Tạo Dàn Ý';
+            }
+        }, 1000);
+    } else if (error.message.includes('401')) {
+        userMessage = 'Lỗi xác thực API. Vui lòng kiểm tra API Key.';
+    } else {
+        userMessage = 'Lỗi kết nối. Vui lòng thử lại.';
+    }
+    
+    showStatus('Lỗi: ' + userMessage, 'error');
+} finally {
+    setTimeout(() => {
+        progressContainer.style.display = 'none';
+        generateBtn.disabled = false;
+    }, 1000);
+}
+
+                
             
             // Trích xuất văn bản từ hình ảnh bằng Tesseract.js
             async function extractTextFromImages(images) {
