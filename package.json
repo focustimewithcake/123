@@ -1,16 +1,13 @@
 {
-  "name": "netlify-functions",
+  "name": "mindmap-ai-generator",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "dependencies": {
-    "node-fetch": "^2.6.7"
-  },
-  "devDependencies": {},
+  "description": "AI Mind Map Generator with Netlify Functions",
+  "main": "index.html",
   "scripts": {
+    "build": "echo 'No build process needed'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": ["mindmap", "ai", "netlify", "openai"],
+  "author": "Your Name",
+  "license": "MIT"
 }
