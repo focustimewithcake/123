@@ -2,7 +2,7 @@
 echo "Testing Netlify Function..."
 
 # Thay YOUR_NETLIFY_URL bằng URL thực tế
-URL="https://your-site.netlify.app/.netlify/functions/analyze-mindmap"
+URL="https://tubular-arithmetic-594a38/netlify/functions/analyze-mindmap"
 
 curl -X POST $URL \
   -H "Content-Type: application/json" \
