@@ -1,0 +1,15 @@
+{
+  "name": "mindmap-ai-generator",
+  "version": "1.0.0",
+  "description": "AI Mind Map Generator using Netlify Functions",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
