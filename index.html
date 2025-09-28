@@ -783,46 +783,79 @@
                 return allText;
             }
             
-            // Phân tích văn bản với AI thông qua Netlify Function
-            async function analyzeTextWithAI(text, apiUrl) {
-                const prompt = `
-                Hãy phân tích văn bản sau và tạo dàn ý cho một sơ đồ tư duy. Dàn ý nên có cấu trúc phân cấp rõ ràng với:
-                1. Chủ đề trung tâm (ngắn gọn, xúc tích)
-                2. Các nhánh chính (3-5 nhánh)
-                3. Các ý phụ dưới mỗi nhánh (2-4 ý mỗi nhánh)
-                
-                Văn bản cần phân tích:
-                "${text}"
-                
-                Hãy trả về kết quả dưới dạng JSON với cấu trúc:
-                {
-                    "centralTopic": "Chủ đề trung tâm",
-                    "mainBranches": [
-                        {
-                            "title": "Tên nhánh chính",
-                            "subTopics": ["Ý phụ 1", "Ý phụ 2", ...]
-                        },
-                        ...
-                    ]
-                }
-                `;
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        text: prompt
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`Lỗi API: ${errorData.error?.message || 'Không thể kết nối đến AI'}`);
-                }
-                
-                const data = await response.json();
+           
+            // Trong phần analyzeTextWithAI function, sửa thành:
+async function analyzeTextWithAI(text, apiUrl) {
+    console.log('Sending request to:', apiUrl);
+    console.log('Text length:', text.length);
+    
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text.substring(0, 3000) // Giới hạn độ dài
+            })
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        // Kiểm tra content type
+        const contentType = response.headers.get('content-type');
+        console.log('Content-Type:', contentType);
+        
+        if (!contentType || !contentType.includes('application/json')) {
+            const textResponse = await response.text();
+            console.error('Non-JSON response:', textResponse.substring(0, 500));
+            throw new Error(`Server returned HTML instead of JSON. Status: ${response.status}`);
+        }
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('API Error:', errorData);
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error}`);
+        }
+
+        const data = await response.json();
+        console.log('API Response:', data);
+        return data;
+        
+    } catch (error) {
+        console.error('API Call Error:', error);
+        throw error;
+    }
+}
+
+            // Thêm function test kết nối trước khi sử dụng
+async function testApiConnection(apiUrl) {
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'OPTIONS'
+        });
+        console.log('API OPTIONS test:', response.status);
+        return response.status === 200;
+    } catch (error) {
+        console.error('API connection test failed:', error);
+        return false;
+    }
+}
+
+// Sử dụng trong generateBtn click handler
+generateBtn.addEventListener('click', async function() {
+    const apiUrl = apiUrlInput.value.trim();
+    
+    // Test connection first
+    const isConnected = await testApiConnection(apiUrl);
+    if (!isConnected) {
+        showStatus('Không thể kết nối đến API server. Vui lòng kiểm tra URL.', 'error');
+        return;
+    }
+    
+    // ... phần còn lại của code
+});
                 
                 // Xử lý phản hồi từ AI
                 if (data.choices && data.choices[0] && data.choices[0].message) {
