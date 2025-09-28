@@ -563,7 +563,7 @@
             const detectedUrl = detectNetlifyFunctionUrl();
             if (detectedUrl) {
                 apiUrlInput.value = detectedUrl;
-                apiUrlInput.disabled = true; // Không cho chỉnh sửa nếu tự động phát hiện
+                apiUrlInput.disabled = true;
                 showStatus('Đã tự động phát hiện Netlify Function URL!', 'success');
             } else {
                 showStatus('Vui lòng nhập Netlify Function URL thủ công', 'warning');
@@ -672,12 +672,33 @@
                 });
             }
             
+            // Test kết nối API
+            async function testApiConnection(apiUrl) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'OPTIONS'
+                    });
+                    console.log('API OPTIONS test:', response.status);
+                    return response.status === 200;
+                } catch (error) {
+                    console.error('API connection test failed:', error);
+                    return false;
+                }
+            }
+            
             // Xử lý phân tích và tạo dàn ý với AI thực sự
             generateBtn.addEventListener('click', async function() {
                 // Kiểm tra API URL
                 const apiUrl = apiUrlInput.value.trim();
                 if (!apiUrl) {
                     showStatus('Vui lòng nhập Netlify Function URL', 'error');
+                    return;
+                }
+                
+                // Test connection first
+                const isConnected = await testApiConnection(apiUrl);
+                if (!isConnected) {
+                    showStatus('Không thể kết nối đến API server. Vui lòng kiểm tra URL.', 'error');
                     return;
                 }
                 
@@ -765,7 +786,7 @@
                         
                         const result = await Tesseract.recognize(
                             images[i].data,
-                            'vie+eng', // Hỗ trợ tiếng Việt và tiếng Anh
+                            'vie+eng',
                             { logger: m => console.log(m) }
                         );
                         
@@ -783,98 +804,47 @@
                 return allText;
             }
             
-           
-            // Trong phần analyzeTextWithAI function, sửa thành:
-async function analyzeTextWithAI(text, apiUrl) {
-    console.log('Sending request to:', apiUrl);
-    console.log('Text length:', text.length);
-    
-    try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                text: text.substring(0, 3000) // Giới hạn độ dài
-            })
-        });
-
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        // Kiểm tra content type
-        const contentType = response.headers.get('content-type');
-        console.log('Content-Type:', contentType);
-        
-        if (!contentType || !contentType.includes('application/json')) {
-            const textResponse = await response.text();
-            console.error('Non-JSON response:', textResponse.substring(0, 500));
-            throw new Error(`Server returned HTML instead of JSON. Status: ${response.status}`);
-        }
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('API Error:', errorData);
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error}`);
-        }
-
-        const data = await response.json();
-        console.log('API Response:', data);
-        return data;
-        
-    } catch (error) {
-        console.error('API Call Error:', error);
-        throw error;
-    }
-}
-
-            // Thêm function test kết nối trước khi sử dụng
-async function testApiConnection(apiUrl) {
-    try {
-        const response = await fetch(apiUrl, {
-            method: 'OPTIONS'
-        });
-        console.log('API OPTIONS test:', response.status);
-        return response.status === 200;
-    } catch (error) {
-        console.error('API connection test failed:', error);
-        return false;
-    }
-}
-
-// Sử dụng trong generateBtn click handler
-generateBtn.addEventListener('click', async function() {
-    const apiUrl = apiUrlInput.value.trim();
-    
-    // Test connection first
-    const isConnected = await testApiConnection(apiUrl);
-    if (!isConnected) {
-        showStatus('Không thể kết nối đến API server. Vui lòng kiểm tra URL.', 'error');
-        return;
-    }
-    
-    // ... phần còn lại của code
-});
+            // Phân tích văn bản với AI thông qua Netlify Function
+            async function analyzeTextWithAI(text, apiUrl) {
+                console.log('Sending request to:', apiUrl);
+                console.log('Text length:', text.length);
                 
-                // Xử lý phản hồi từ AI
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    const aiResponse = data.choices[0].message.content;
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            text: text.substring(0, 3000)
+                        })
+                    });
+
+                    console.log('Response status:', response.status);
                     
-                    // Trích xuất JSON từ phản hồi
-                    try {
-                        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-                        if (jsonMatch) {
-                            return JSON.parse(jsonMatch[0]);
-                        } else {
-                            return createFallbackOutline(text);
-                        }
-                    } catch (error) {
-                        console.error('Lỗi khi parse JSON từ AI:', error);
-                        return createFallbackOutline(text);
+                    // Kiểm tra content type
+                    const contentType = response.headers.get('content-type');
+                    console.log('Content-Type:', contentType);
+                    
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const textResponse = await response.text();
+                        console.error('Non-JSON response:', textResponse.substring(0, 500));
+                        throw new Error(`Server returned HTML instead of JSON. Status: ${response.status}`);
                     }
-                } else {
-                    throw new Error('Phản hồi từ AI không hợp lệ');
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('API Error:', errorData);
+                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('API Response:', data);
+                    return data;
+                    
+                } catch (error) {
+                    console.error('API Call Error:', error);
+                    throw error;
                 }
             }
             
