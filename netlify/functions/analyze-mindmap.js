@@ -1,7 +1,11 @@
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
-  // Xử lý CORS
+  // 🔍 THÊM LOGGING Ở ĐÂY
+  console.log('Event body:', event.body);
+  console.log('OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
+  
+  // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -9,7 +13,7 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json'
   };
 
-  // Xử lý preflight request
+  // Handle preflight OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -18,6 +22,7 @@ exports.handler = async (event) => {
     };
   }
 
+  // Only allow POST
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -37,7 +42,9 @@ exports.handler = async (event) => {
       };
     }
 
-    // Gọi OpenAI API
+    console.log('Processing text length:', text.length);
+    
+    // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -49,13 +56,13 @@ exports.handler = async (event) => {
         messages: [
           {
             role: 'system',
-            content: `Bạn là AI chuyên tạo sơ đồ tư duy. Hãy phân tích văn bản và trả về JSON với cấu trúc:
+            content: `Bạn là AI chuyên tạo sơ đồ tư duy. Phân tích văn bản và trả về JSON với cấu trúc:
             {
               "centralTopic": "Chủ đề trung tâm",
               "mainBranches": [
                 {
                   "title": "Tên nhánh chính",
-                  "subTopics": ["Ý phụ 1", "Ý phụ 2"]
+                  "subTopics": ["Ý phụ 1", "Ý phụ 2", "Ý phụ 3"]
                 }
               ]
             }
@@ -63,46 +70,59 @@ exports.handler = async (event) => {
           },
           {
             role: 'user',
-            content: `Hãy tạo sơ đồ tư duy từ văn bản sau: ${text}`
+            content: `Tạo sơ đồ tư duy từ văn bản sau: ${text.substring(0, 3000)}`
           }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 1500
       })
     });
 
+    // 🔍 THÊM LOGGING CHO RESPONSE
+    console.log('OpenAI API response status:', response.status);
+
     if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('OpenAI API data received');
     
-    // Xử lý response từ OpenAI
+    // Process OpenAI response
     if (data.choices && data.choices[0] && data.choices[0].message) {
       const aiResponse = data.choices[0].message.content;
+      console.log('AI Response content:', aiResponse.substring(0, 200) + '...');
       
       // Try to parse JSON from AI response
       try {
-        // Tìm JSON trong response (AI có thể thêm text ngoài JSON)
         const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const mindmapData = JSON.parse(jsonMatch[0]);
+          console.log('Successfully parsed mindmap data');
           return {
             statusCode: 200,
             headers,
             body: JSON.stringify(mindmapData)
           };
         } else {
-          // Fallback nếu không tìm thấy JSON
+          console.log('No JSON found in AI response, using fallback');
+          // Fallback data
           return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
               centralTopic: "Chủ đề chính",
               mainBranches: [
-                { title: "Nhánh 1", subTopics: ["Ý phụ 1", "Ý phụ 2"] },
-                { title: "Nhánh 2", subTopics: ["Ý phụ 3", "Ý phụ 4"] }
+                { 
+                  title: "Phân tích chính", 
+                  subTopics: ["Điểm quan trọng 1", "Điểm quan trọng 2", "Điểm quan trọng 3"] 
+                },
+                { 
+                  title: "Ứng dụng", 
+                  subTopics: ["Cách sử dụng", "Lợi ích", "Ví dụ thực tế"] 
+                }
               ]
             })
           };
@@ -114,15 +134,17 @@ exports.handler = async (event) => {
           statusCode: 200,
           headers,
           body: JSON.stringify({
-            centralTopic: "Chủ đề chính từ văn bản",
+            centralTopic: "Chủ đề từ văn bản",
             mainBranches: [
-              { title: "Phân tích chính", subTopics: ["Điểm quan trọng 1", "Điểm quan trọng 2"] },
-              { title: "Ứng dụng", subTopics: ["Cách sử dụng", "Lợi ích"] }
+              { title: "Khái niệm", subTopics: ["Định nghĩa", "Đặc điểm"] },
+              { title: "Ứng dụng", subTopics: ["Lợi ích", "Cách sử dụng"] },
+              { title: "Ví dụ", subTopics: ["Case study", "Best practice"] }
             ]
           })
         };
       }
     } else {
+      console.error('Invalid OpenAI response format');
       throw new Error('Invalid response format from OpenAI');
     }
 
