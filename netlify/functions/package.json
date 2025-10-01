@@ -1,0 +1,6 @@
+{
+  "name": "ai-mindmap-bot",
+  "version": "1.0.0",
+  "description": "AI Mind Map Bot - No API Key Required",
+  "main": "ai-mindmap-bot.js"
+}
