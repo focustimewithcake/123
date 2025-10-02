@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 AI Mind Map Pro - Đăng nhập & Chỉnh sửa</title>
+    <title>🤖 AI Mind Map Pro - Client ID & MoMo Auto</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -48,7 +48,7 @@
             position: relative;
         }
         
-        .user-badge {
+        .client-badge {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -104,11 +104,26 @@
             padding-bottom: 10px;
         }
         
-        /* Auth Styles */
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .client-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .usage-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .usage-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--ai-color));
+            border-radius: 10px;
+            transition: width 0.3s;
         }
         
         .form-input {
@@ -173,30 +188,34 @@
             box-shadow: none;
         }
         
-        /* User Info */
-        .user-info {
-            background: white;
+        .package-option {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
             padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid var(--success-color);
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
         }
         
-        .usage-bar {
-            background: #ecf0f1;
-            border-radius: 10px;
-            height: 8px;
+        .package-option:hover {
+            border-color: var(--ai-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .package-option.selected {
+            border-color: var(--ai-color);
+            background: rgba(0, 206, 201, 0.05);
+        }
+        
+        .package-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
             margin: 10px 0;
-            overflow: hidden;
         }
         
-        .usage-progress {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success-color), var(--ai-color));
-            border-radius: 10px;
-            transition: width 0.3s;
-        }
-        
-        /* MindMap Container */
         .mindmap-container {
             background: #f8f9fa;
             border-radius: 15px;
@@ -215,7 +234,6 @@
             flex-wrap: wrap;
         }
         
-        /* MindMap Styles với bố cục thông minh */
         .mindmap {
             position: relative;
             width: 100%;
@@ -286,7 +304,6 @@
             transform-origin: 0 0;
         }
         
-        /* Progress & Status */
         .progress-container {
             margin: 20px 0;
             display: none;
@@ -341,7 +358,6 @@
             margin-bottom: 20px;
         }
         
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -364,99 +380,63 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-        
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e9ecef;
-        }
-        
-        .tab {
-            padding: 15px 25px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-        }
-        
-        .tab.active {
-            border-bottom-color: var(--ai-color);
-            color: var(--ai-color);
-            font-weight: 600;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="user-badge" id="userBadge" style="display: none;">
-                <i class="fas fa-user"></i> <span id="usernameDisplay"></span>
+            <div class="client-badge" id="clientBadge">
+                <i class="fas fa-id-card"></i> Client ID: <span id="clientIdDisplay">Đang tạo...</span>
             </div>
             <h1>🤖 AI Mind Map Pro</h1>
-            <p>Đăng nhập • Chỉnh sửa • Tải ảnh • 3 lần miễn phí</p>
+            <p>Client ID • MoMo Tự động • 3 lượt free • 20K = 22 lượt</p>
         </header>
         
         <div class="main-content">
             <!-- SIDEBAR -->
             <div class="sidebar">
-                <!-- Auth Panel -->
-                <div class="panel" id="authPanel">
+                <!-- Client Info Panel -->
+                <div class="panel">
                     <div class="panel-title">
-                        <i class="fas fa-sign-in-alt"></i> Đăng nhập / Đăng ký
+                        <i class="fas fa-user-circle"></i> Thông tin Client
                     </div>
                     
-                    <div class="tabs">
-                        <div class="tab active" data-tab="login">Đăng nhập</div>
-                        <div class="tab" data-tab="register">Đăng ký</div>
-                    </div>
-                    
-                    <div class="tab-content active" id="loginTab">
-                        <div class="auth-form">
-                            <input type="text" class="form-input" id="loginUsername" placeholder="Tên đăng nhập">
-                            <input type="password" class="form-input" id="loginPassword" placeholder="Mật khẩu">
-                            <button class="btn btn-primary" id="loginBtn">
-                                <i class="fas fa-sign-in-alt"></i> Đăng nhập
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-content" id="registerTab">
-                        <div class="auth-form">
-                            <input type="text" class="form-input" id="registerUsername" placeholder="Tên đăng nhập">
-                            <input type="password" class="form-input" id="registerPassword" placeholder="Mật khẩu">
-                            <input type="email" class="form-input" id="registerEmail" placeholder="Email (tùy chọn)">
-                            <button class="btn btn-primary" id="registerBtn">
-                                <i class="fas fa-user-plus"></i> Đăng ký
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- User Info Panel -->
-                <div class="panel" id="userPanel" style="display: none;">
-                    <div class="panel-title">
-                        <i class="fas fa-user-circle"></i> Tài khoản
-                    </div>
-                    
-                    <div class="user-info">
-                        <p><strong>Tên:</strong> <span id="displayUsername"></span></p>
-                        <p><strong>Đã dùng:</strong> <span id="usageCount">0</span>/3 lần</p>
-                        <p><strong>Còn lại:</strong> <span id="remainingGenerations">3</span> lần</p>
+                    <div class="client-info">
+                        <p><strong>Client ID:</strong> <span id="displayClientId"></span></p>
+                        <p><strong>Đã dùng:</strong> <span id="usageCount">0</span>/<span id="totalGenerations">3</span> lượt</p>
+                        <p><strong>Còn lại:</strong> <span id="remainingGenerations">3</span> lượt</p>
                         
                         <div class="usage-bar">
                             <div class="usage-progress" id="usageProgress" style="width: 0%"></div>
                         </div>
                         
-                        <button class="btn btn-danger" id="logoutBtn" style="width: 100%; margin-top: 15px;">
-                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        <button class="btn btn-warning" id="refreshClientBtn" style="width: 100%; margin-top: 10px;">
+                            <i class="fas fa-sync-alt"></i> Làm mới
                         </button>
                     </div>
+                </div>
+                
+                <!-- Package Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <i class="fas fa-shopping-cart"></i> Mua thêm lượt
+                    </div>
+                    
+                    <div class="package-option selected" data-package="basic">
+                        <h3>GÓI 20.000 VND</h3>
+                        <div class="package-price">20.000 VND</div>
+                        <p>Nhận ngay <strong>22 lượt</strong> tạo sơ đồ</p>
+                        <ul>
+                            <li>✅ Tự động kích hoạt ngay</li>
+                            <li>✅ Thanh toán qua MoMo</li>
+                            <li>✅ Không giới hạn thời gian</li>
+                        </ul>
+                        <button class="btn btn-success buy-package-btn" style="width: 100%; margin-top: 15px;">
+                            <i class="fas fa-mobile-alt"></i> Mua ngay với MoMo
+                        </button>
+                    </div>
+                    
+                    <div class="status-message" id="paymentStatus"></div>
                 </div>
                 
                 <!-- Input Panel -->
@@ -487,8 +467,8 @@
                         </div>
                     </div>
                     
-                    <button class="btn btn-primary" id="generateBtn" disabled>
-                        <i class="fas fa-robot"></i> Tạo Sơ Đồ
+                    <button class="btn btn-primary" id="generateBtn">
+                        <i class="fas fa-robot"></i> Tạo Sơ Đồ (Còn <span id="generateRemaining">3</span> lượt)
                     </button>
                     
                     <div class="progress-container" id="progressContainer">
@@ -502,11 +482,13 @@
                 </div>
                 
                 <!-- Saved Mindmaps Panel -->
-                <div class="panel" id="savedMapsPanel" style="display: none;">
+                <div class="panel">
                     <div class="panel-title">
                         <i class="fas fa-history"></i> Sơ đồ đã lưu
                     </div>
-                    <div id="savedMapsList"></div>
+                    <div id="savedMapsList">
+                        <p style="text-align: center; color: #666; padding: 20px;">Chưa có sơ đồ nào được lưu</p>
+                    </div>
                 </div>
             </div>
             
@@ -531,8 +513,59 @@
                     <div class="empty-state">
                         <i class="fas fa-project-diagram"></i>
                         <h3>Chưa có sơ đồ</h3>
-                        <p>Đăng nhập và tạo sơ đồ tư duy đầu tiên của bạn!</p>
+                        <p>Nhập nội dung và tạo sơ đồ tư duy đầu tiên của bạn!</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px; text-align: center;">
+                <i class="fas fa-mobile-alt"></i> Thanh toán với MoMo
+            </h2>
+            
+            <div id="paymentStep1">
+                <p>Bạn đang mua: <strong>Gói 20K - 22 lượt</strong></p>
+                <p>Số tiền: <strong>20.000 VND</strong></p>
+                
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <h4><i class="fas fa-info-circle"></i> Hướng dẫn:</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Nhấn "Thanh toán ngay" để mở MoMo</li>
+                        <li>Xác nhận thanh toán trong app MoMo</li>
+                        <li>Lượt sẽ được <strong>tự động cộng ngay</strong></li>
+                    </ol>
+                </div>
+                
+                <button class="btn btn-success" id="confirmPaymentBtn" style="width: 100%;">
+                    <i class="fas fa-bolt"></i> Thanh toán ngay
+                </button>
+                
+                <button class="btn" id="cancelPaymentBtn" style="width: 100%; margin-top: 10px; background: #95a5a6;">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+            </div>
+            
+            <div id="paymentStep2" style="display: none; text-align: center;">
+                <div style="font-size: 4rem; color: #00cec9; margin: 20px 0;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <h3>Đang xử lý thanh toán...</h3>
+                <p>Vui lòng hoàn tất thanh toán trong ứng dụng MoMo</p>
+                <p id="paymentTimer">Tự động kiểm tra sau: <strong>10</strong> giây</p>
+                
+                <div id="paymentSuccess" style="display: none;">
+                    <div style="font-size: 4rem; color: #00b894; margin: 20px 0;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Thanh toán thành công!</h3>
+                    <p>22 lượt đã được cộng vào tài khoản của bạn</p>
+                    <button class="btn btn-success" onclick="closePaymentModal()" style="width: 100%;">
+                        <i class="fas fa-check"></i> Hoàn tất
+                    </button>
                 </div>
             </div>
         </div>
@@ -542,33 +575,109 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         // STATE MANAGEMENT
-        let currentUser = null;
+        let currentClient = null;
         let currentMindmap = null;
         let isEditing = false;
         let originalMindmapData = null;
+        let paymentCheckInterval = null;
 
         // DOM ELEMENTS
-        const authPanel = document.getElementById('authPanel');
-        const userPanel = document.getElementById('userPanel');
-        const userBadge = document.getElementById('userBadge');
-        const usernameDisplay = document.getElementById('usernameDisplay');
-        const displayUsername = document.getElementById('displayUsername');
+        const clientBadge = document.getElementById('clientBadge');
+        const clientIdDisplay = document.getElementById('clientIdDisplay');
+        const displayClientId = document.getElementById('displayClientId');
         const usageCount = document.getElementById('usageCount');
         const remainingGenerations = document.getElementById('remainingGenerations');
+        const totalGenerations = document.getElementById('totalGenerations');
         const usageProgress = document.getElementById('usageProgress');
-        const savedMapsPanel = document.getElementById('savedMapsPanel');
-        const savedMapsList = document.getElementById('savedMapsList');
+        const generateRemaining = document.getElementById('generateRemaining');
         
         const generateBtn = document.getElementById('generateBtn');
         const downloadBtn = document.getElementById('downloadBtn');
         const editToggleBtn = document.getElementById('editToggleBtn');
         const saveBtn = document.getElementById('saveBtn');
         const resetBtn = document.getElementById('resetBtn');
+        const refreshClientBtn = document.getElementById('refreshClientBtn');
+        const buyPackageBtn = document.querySelector('.buy-package-btn');
         
         const progressContainer = document.getElementById('progressContainer');
         const progress = document.getElementById('progress');
         const progressText = document.getElementById('progressText');
         const statusMessage = document.getElementById('statusMessage');
+        const paymentStatus = document.getElementById('paymentStatus');
+        
+        const paymentModal = document.getElementById('paymentModal');
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
+        const paymentStep1 = document.getElementById('paymentStep1');
+        const paymentStep2 = document.getElementById('paymentStep2');
+        const paymentSuccess = document.getElementById('paymentSuccess');
+        const paymentTimer = document.getElementById('paymentTimer');
+
+        // CLIENT ID MANAGEMENT
+        function getClientId() {
+            let clientId = localStorage.getItem('mindmap_client_id');
+            if (!clientId) {
+                // Tạo client ID ngẫu nhiên
+                clientId = 'client_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                localStorage.setItem('mindmap_client_id', clientId);
+            }
+            return clientId;
+        }
+
+        async function loadClientInfo() {
+            const clientId = getClientId();
+            try {
+                const response = await fetch('/.netlify/functions/get-client', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Client-ID': clientId
+                    },
+                    body: JSON.stringify({ clientId: clientId })
+                });
+
+                if (response.ok) {
+                    const clientData = await response.json();
+                    currentClient = clientData;
+                    updateClientDisplay(clientData);
+                    loadSavedMindmaps();
+                } else {
+                    throw new Error('Failed to load client info');
+                }
+            } catch (error) {
+                console.error('Error loading client info:', error);
+                // Tạo client mới nếu chưa có
+                currentClient = {
+                    clientId: clientId,
+                    usageCount: 0,
+                    remainingGenerations: 3,
+                    totalGenerations: 3
+                };
+                updateClientDisplay(currentClient);
+            }
+        }
+
+        function updateClientDisplay(clientData) {
+            clientIdDisplay.textContent = clientData.clientId.substring(0, 12) + '...';
+            displayClientId.textContent = clientData.clientId;
+            usageCount.textContent = clientData.usageCount;
+            remainingGenerations.textContent = clientData.remainingGenerations;
+            totalGenerations.textContent = clientData.totalGenerations;
+            generateRemaining.textContent = clientData.remainingGenerations;
+            
+            const usagePercentage = (clientData.usageCount / clientData.totalGenerations) * 100;
+            usageProgress.style.width = `${usagePercentage}%`;
+            
+            // Update generate button state
+            generateBtn.disabled = clientData.remainingGenerations <= 0;
+            if (clientData.remainingGenerations <= 0) {
+                generateBtn.innerHTML = `<i class="fas fa-robot"></i> Hết lượt - Mua thêm`;
+                generateBtn.style.background = '#e17055';
+            } else {
+                generateBtn.innerHTML = `<i class="fas fa-robot"></i> Tạo Sơ Đồ (Còn ${clientData.remainingGenerations} lượt)`;
+                generateBtn.style.background = '';
+            }
+        }
 
         // INITIALIZATION
         document.addEventListener('DOMContentLoaded', function() {
@@ -577,169 +686,30 @@
         });
 
         function initializeApp() {
-            // Check if user is logged in
-            const savedUser = localStorage.getItem('mindmap_user');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showUserInterface();
-                loadSavedMindmaps();
-            }
+            loadClientInfo();
         }
 
         function setupEventListeners() {
-            // Auth tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabName = this.getAttribute('data-tab');
-                    switchTab(tabName);
-                });
-            });
-
-            // Auth buttons
-            document.getElementById('loginBtn').addEventListener('click', login);
-            document.getElementById('registerBtn').addEventListener('click', register);
-            document.getElementById('logoutBtn').addEventListener('click', logout);
-
-            // Main functionality
-            document.getElementById('generateBtn').addEventListener('click', generateMindmap);
-            document.getElementById('downloadBtn').addEventListener('click', downloadAsImage);
-            document.getElementById('editToggleBtn').addEventListener('click', toggleEditing);
-            document.getElementById('saveBtn').addEventListener('click', saveChanges);
-            document.getElementById('resetBtn').addEventListener('click', resetMindmap);
+            generateBtn.addEventListener('click', generateMindmap);
+            downloadBtn.addEventListener('click', downloadAsImage);
+            editToggleBtn.addEventListener('click', toggleEditing);
+            saveBtn.addEventListener('click', saveChanges);
+            resetBtn.addEventListener('click', resetMindmap);
+            refreshClientBtn.addEventListener('click', loadClientInfo);
+            buyPackageBtn.addEventListener('click', openPaymentModal);
+            confirmPaymentBtn.addEventListener('click', processMoMoPayment);
+            cancelPaymentBtn.addEventListener('click', closePaymentModal);
 
             // Enable generate button when text is entered
             document.getElementById('textInput').addEventListener('input', function() {
-                generateBtn.disabled = !this.value.trim() || !currentUser;
+                generateBtn.disabled = !this.value.trim() || (currentClient && currentClient.remainingGenerations <= 0);
             });
-        }
-
-        // AUTHENTICATION FUNCTIONS
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            document.getElementById(`${tabName}Tab`).classList.add('active');
-        }
-
-        async function login() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-
-            if (!username || !password) {
-                showStatus('Vui lòng nhập đầy đủ thông tin', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch('/.netlify/functions/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'login',
-                        username: username,
-                        password: password
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    currentUser = result.user;
-                    localStorage.setItem('mindmap_user', JSON.stringify(currentUser));
-                    showUserInterface();
-                    loadSavedMindmaps();
-                    showStatus('Đăng nhập thành công!', 'success');
-                } else {
-                    showStatus('Lỗi: ' + result.error, 'error');
-                }
-            } catch (error) {
-                showStatus('Lỗi kết nối: ' + error.message, 'error');
-            }
-        }
-
-        async function register() {
-            const username = document.getElementById('registerUsername').value.trim();
-            const password = document.getElementById('registerPassword').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
-
-            if (!username || !password) {
-                showStatus('Vui lòng nhập tên đăng nhập và mật khẩu', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch('/.netlify/functions/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'register',
-                        username: username,
-                        password: password,
-                        email: email
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    showStatus('Đăng ký thành công! Vui lòng đăng nhập.', 'success');
-                    switchTab('login');
-                    // Auto-fill login form
-                    document.getElementById('loginUsername').value = username;
-                    document.getElementById('loginPassword').value = '';
-                } else {
-                    showStatus('Lỗi: ' + result.error, 'error');
-                }
-            } catch (error) {
-                showStatus('Lỗi kết nối: ' + error.message, 'error');
-            }
-        }
-
-        function logout() {
-            currentUser = null;
-            currentMindmap = null;
-            localStorage.removeItem('mindmap_user');
-            showAuthInterface();
-            resetMindmap();
-            showStatus('Đã đăng xuất', 'success');
-        }
-
-        function showAuthInterface() {
-            authPanel.style.display = 'block';
-            userPanel.style.display = 'none';
-            userBadge.style.display = 'none';
-            savedMapsPanel.style.display = 'none';
-            generateBtn.disabled = true;
-            disableToolbar();
-        }
-
-        function showUserInterface() {
-            authPanel.style.display = 'none';
-            userPanel.style.display = 'block';
-            userBadge.style.display = 'flex';
-            savedMapsPanel.style.display = 'block';
-            
-            usernameDisplay.textContent = currentUser.username;
-            displayUsername.textContent = currentUser.username;
-            usageCount.textContent = currentUser.usageCount;
-            remainingGenerations.textContent = currentUser.remainingGenerations;
-            
-            const usagePercentage = (currentUser.usageCount / 3) * 100;
-            usageProgress.style.width = `${usagePercentage}%`;
-            
-            generateBtn.disabled = !document.getElementById('textInput').value.trim();
         }
 
         // MINDMAP FUNCTIONS
         async function generateMindmap() {
-            if (!currentUser) {
-                showStatus('Vui lòng đăng nhập', 'error');
-                return;
-            }
-
-            if (currentUser.remainingGenerations <= 0) {
-                showStatus('Bạn đã sử dụng hết 3 lần miễn phí!', 'error');
+            if (!currentClient || currentClient.remainingGenerations <= 0) {
+                showStatus('Bạn đã hết lượt sử dụng. Vui lòng mua thêm gói!', 'error');
                 return;
             }
 
@@ -775,12 +745,14 @@
 
                 const response = await fetch('/.netlify/functions/ai-mindmap-bot', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Client-ID': currentClient.clientId
+                    },
                     body: JSON.stringify({
                         text: text,
                         style: style,
                         complexity: complexity,
-                        username: currentUser.username,
                         saveToAccount: true
                     })
                 });
@@ -792,20 +764,20 @@
 
                 const data = await response.json();
                 currentMindmap = data;
-                originalMindmapData = JSON.parse(JSON.stringify(data)); // Deep copy for reset
+                originalMindmapData = JSON.parse(JSON.stringify(data));
 
                 renderMindMap(data);
                 enableToolbar();
                 
-                // Update user info
-                currentUser.usageCount = data.usage.used;
-                currentUser.remainingGenerations = data.usage.remaining;
-                localStorage.setItem('mindmap_user', JSON.stringify(currentUser));
-                showUserInterface();
+                // Update client info
+                currentClient.usageCount = data.usage.used;
+                currentClient.remainingGenerations = data.usage.remaining;
+                currentClient.totalGenerations = data.usage.total;
+                updateClientDisplay(currentClient);
 
                 progress.style.width = '100%';
                 progressText.textContent = '✅ Tạo sơ đồ thành công!';
-                showStatus(`Đã tạo sơ đồ! Còn ${data.usage.remaining} lần sử dụng.`, 'success');
+                showStatus(`Đã tạo sơ đồ! Còn ${data.usage.remaining} lượt sử dụng.`, 'success');
 
             } catch (error) {
                 console.error('Generation error:', error);
@@ -813,12 +785,126 @@
             } finally {
                 setTimeout(() => {
                     progressContainer.style.display = 'none';
-                    generateBtn.disabled = false;
+                    generateBtn.disabled = currentClient.remainingGenerations <= 0;
                 }, 2000);
             }
         }
 
-        // RENDER MINDMAP WITH SMART LAYOUT
+        // PAYMENT FUNCTIONS
+        function openPaymentModal() {
+            paymentModal.style.display = 'flex';
+            paymentStep1.style.display = 'block';
+            paymentStep2.style.display = 'none';
+            paymentSuccess.style.display = 'none';
+        }
+
+        function closePaymentModal() {
+            paymentModal.style.display = 'none';
+            stopPaymentStatusCheck();
+        }
+
+        async function processMoMoPayment() {
+            if (!currentClient) {
+                showStatus('Lỗi: Không tìm thấy thông tin client', 'error');
+                return;
+            }
+
+            confirmPaymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            confirmPaymentBtn.disabled = true;
+
+            try {
+                const response = await fetch('/.netlify/functions/momo-payment', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Client-ID': currentClient.clientId
+                    },
+                    body: JSON.stringify({
+                        packageType: 'basic',
+                        clientId: currentClient.clientId
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Chuyển sang bước 2
+                    paymentStep1.style.display = 'none';
+                    paymentStep2.style.display = 'block';
+                    
+                    // Mở MoMo trong cửa sổ mới
+                    window.open(result.paymentUrl, 'momoPayment', 'width=400,height=600');
+                    
+                    // Bắt đầu kiểm tra trạng thái thanh toán
+                    startPaymentStatusCheck();
+                    
+                } else {
+                    throw new Error(result.error || 'Không thể tạo yêu cầu thanh toán');
+                }
+            } catch (error) {
+                showStatus('Lỗi: ' + error.message, 'error');
+            } finally {
+                confirmPaymentBtn.innerHTML = '<i class="fas fa-bolt"></i> Thanh toán ngay';
+                confirmPaymentBtn.disabled = false;
+            }
+        }
+
+        function startPaymentStatusCheck() {
+            let seconds = 10;
+            paymentCheckInterval = setInterval(async () => {
+                seconds--;
+                paymentTimer.innerHTML = `Tự động kiểm tra sau: <strong>${seconds}</strong> giây`;
+                
+                if (seconds <= 0) {
+                    await checkPaymentStatus();
+                    seconds = 10;
+                }
+            }, 1000);
+        }
+
+        function stopPaymentStatusCheck() {
+            if (paymentCheckInterval) {
+                clearInterval(paymentCheckInterval);
+                paymentCheckInterval = null;
+            }
+        }
+
+        async function checkPaymentStatus() {
+            if (!currentClient) return;
+
+            try {
+                // Load lại thông tin client để kiểm tra lượt mới
+                const response = await fetch('/.netlify/functions/get-client', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Client-ID': currentClient.clientId
+                    },
+                    body: JSON.stringify({ clientId: currentClient.clientId })
+                });
+
+                if (response.ok) {
+                    const clientData = await response.json();
+                    
+                    // Nếu lượt tăng lên -> thanh toán thành công
+                    if (clientData.remainingGenerations > currentClient.remainingGenerations) {
+                        currentClient = clientData;
+                        updateClientDisplay(clientData);
+                        
+                        // Hiển thị thành công
+                        paymentStep2.style.display = 'none';
+                        paymentSuccess.style.display = 'block';
+                        stopPaymentStatusCheck();
+                        
+                        showStatus(`🎉 Mua gói thành công! Bạn đã có thêm ${clientData.remainingGenerations - currentClient.remainingGenerations} lượt!`, 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking payment status:', error);
+            }
+        }
+
+        // RENDER MINDMAP (giữ nguyên từ trước)
         function renderMindMap(data) {
             const mindmap = document.getElementById('mindmap');
             mindmap.innerHTML = '';
@@ -885,7 +971,6 @@
             node.style.position = 'absolute';
             node.style.zIndex = '2';
             
-            // Make editable when in edit mode
             if (isEditing) {
                 node.setAttribute('contenteditable', 'true');
                 node.addEventListener('input', function() {
@@ -936,7 +1021,7 @@
             });
         }
 
-        // EDITING FUNCTIONS
+        // EDITING FUNCTIONS (giữ nguyên từ trước)
         function toggleEditing() {
             isEditing = !isEditing;
             const nodes = document.querySelectorAll('.node');
@@ -999,7 +1084,7 @@
             });
 
             showStatus('Đã lưu thay đổi!', 'success');
-            toggleEditing(); // Exit edit mode
+            toggleEditing();
         }
 
         function resetMindmap() {
@@ -1010,7 +1095,7 @@
             }
         }
 
-        // DOWNLOAD FUNCTION
+        // DOWNLOAD FUNCTION (giữ nguyên)
         async function downloadAsImage() {
             const mindmap = document.getElementById('mindmap');
             
@@ -1020,12 +1105,12 @@
 
                 const canvas = await html2canvas(mindmap, {
                     backgroundColor: '#f8f9fa',
-                    scale: 2, // Higher quality
+                    scale: 2,
                     useCORS: true
                 });
 
                 const link = document.createElement('a');
-                link.download = `mindmap-${currentUser.username}-${Date.now()}.png`;
+                link.download = `mindmap-${currentClient.clientId}-${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
 
@@ -1038,15 +1123,18 @@
             }
         }
 
-        // SAVED MINDMAPS
+        // SAVED MINDMAPS (giữ nguyên)
         async function loadSavedMindmaps() {
-            if (!currentUser) return;
+            if (!currentClient) return;
 
             try {
-                const response = await fetch('/.netlify/functions/get-user-mindmaps', {
+                const response = await fetch('/.netlify/functions/get-client-mindmaps', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: currentUser.username })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Client-ID': currentClient.clientId
+                    },
+                    body: JSON.stringify({ clientId: currentClient.clientId })
                 });
 
                 if (response.ok) {
@@ -1059,6 +1147,8 @@
         }
 
         function displaySavedMindmaps(mindmaps) {
+            const savedMapsList = document.getElementById('savedMapsList');
+            
             if (!mindmaps || mindmaps.length === 0) {
                 savedMapsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Chưa có sơ đồ nào được lưu</p>';
                 return;
@@ -1120,8 +1210,9 @@
             }, 5000);
         }
 
-        // Make loadSavedMindmap available globally
+        // Make functions available globally
         window.loadSavedMindmap = loadSavedMindmap;
+        window.closePaymentModal = closePaymentModal;
     </script>
 </body>
 </html>
