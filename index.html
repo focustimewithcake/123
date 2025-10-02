@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 AI Mind Map Bot - Miễn phí 100%</title>
+    <title>🤖 AI Mind Map Pro - Đăng nhập & Chỉnh sửa</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -11,6 +11,9 @@
             --secondary-color: #a29bfe;
             --accent-color: #fd79a8;
             --ai-color: #00cec9;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --danger-color: #e17055;
         }
         
         * {
@@ -29,7 +32,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -39,13 +42,13 @@
         
         header {
             text-align: center;
-            padding: 40px;
-            background: linear-gradient(135deg, var(--ai-color), #00b894);
+            padding: 30px;
+            background: linear-gradient(135deg, var(--ai-color), var(--primary-color));
             color: white;
             position: relative;
         }
         
-        .ai-badge {
+        .user-badge {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -57,128 +60,233 @@
         }
         
         h1 {
-            font-size: 2.8rem;
-            margin-bottom: 15px;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .main-content {
-            padding: 40px;
+            padding: 30px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            min-height: 600px;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            min-height: 800px;
         }
         
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .main-content {
                 grid-template-columns: 1fr;
             }
         }
         
-        .input-panel {
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .panel {
             background: #f8f9fa;
             border-radius: 15px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
         
-        .config-section {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            border-left: 4px solid var(--ai-color);
-        }
-        
-        .config-title {
-            font-size: 1.2rem;
+        .panel-title {
+            font-size: 1.3rem;
             font-weight: 700;
-            color: var(--ai-color);
-            margin-bottom: 15px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
+            border-bottom: 2px solid var(--ai-color);
+            padding-bottom: 10px;
         }
         
-        .text-input {
+        /* Auth Styles */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-input {
             width: 100%;
-            min-height: 200px;
-            padding: 20px;
+            padding: 15px;
             border: 2px solid #e9ecef;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 1rem;
-            resize: vertical;
-            line-height: 1.6;
             transition: all 0.3s;
-            margin-bottom: 15px;
         }
         
-        .text-input:focus {
+        .form-input:focus {
             outline: none;
             border-color: var(--ai-color);
             box-shadow: 0 0 0 3px rgba(0, 206, 201, 0.1);
         }
         
-        .generate-btn {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--ai-color), #00b894);
-            color: white;
+        .btn {
+            padding: 15px 25px;
             border: none;
-            border-radius: 12px;
-            font-size: 1.2rem;
+            border-radius: 10px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
+            text-decoration: none;
         }
         
-        .generate-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 206, 201, 0.3);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--ai-color), var(--primary-color));
+            color: white;
         }
         
-        .generate-btn:disabled {
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning-color);
+            color: #2d3436;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .btn:disabled {
             background: #bdc3c7;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
         
-        .result-panel {
+        /* User Info */
+        .user-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .usage-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .usage-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--ai-color));
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+        
+        /* MindMap Container */
+        .mindmap-container {
             background: #f8f9fa;
             border-radius: 15px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            position: relative;
+            min-height: 700px;
             display: flex;
             flex-direction: column;
         }
         
-        .mindmap-container {
-            flex: 1;
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            min-height: 400px;
+        .toolbar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        /* MindMap Styles với bố cục thông minh */
+        .mindmap {
             position: relative;
-            overflow: auto;
-        }
-        
-        .ai-analysis {
+            width: 100%;
+            height: 600px;
             background: white;
-            padding: 20px;
             border-radius: 10px;
-            margin-top: 20px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            border-left: 4px solid var(--ai-color);
+            overflow: auto;
+            border: 2px dashed #e9ecef;
         }
         
+        .node {
+            position: absolute;
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid var(--ai-color);
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            max-width: 200px;
+            min-width: 120px;
+            word-wrap: break-word;
+            z-index: 2;
+            cursor: pointer;
+        }
+        
+        .node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        
+        .node.central {
+            background: linear-gradient(135deg, var(--ai-color), var(--primary-color));
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            border: none;
+            box-shadow: 0 8px 25px rgba(0, 206, 201, 0.4);
+            z-index: 5;
+        }
+        
+        .node.main-branch {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .node.sub-topic {
+            background: white;
+            color: #2d3436;
+            border-color: var(--secondary-color);
+            font-size: 0.95rem;
+        }
+        
+        .node.editing {
+            background: #fff3cd;
+            border-color: var(--warning-color);
+            box-shadow: 0 0 0 3px rgba(253, 203, 110, 0.3);
+        }
+        
+        .connection {
+            position: absolute;
+            background: var(--secondary-color);
+            height: 2px;
+            z-index: 1;
+            transform-origin: 0 0;
+        }
+        
+        /* Progress & Status */
         .progress-container {
             margin: 20px 0;
             display: none;
@@ -194,16 +302,10 @@
         
         .progress {
             height: 100%;
-            background: linear-gradient(90deg, var(--ai-color), #00b894);
+            background: linear-gradient(90deg, var(--ai-color), var(--primary-color));
             width: 0%;
             transition: width 0.4s;
             border-radius: 10px;
-        }
-        
-        .progress-text {
-            font-size: 0.9rem;
-            color: #666;
-            text-align: center;
         }
         
         .status-message {
@@ -221,9 +323,15 @@
             border: 1px solid #c3e6cb;
         }
         
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 80px 20px;
             color: #7f8c8d;
         }
         
@@ -233,100 +341,136 @@
             margin-bottom: 20px;
         }
         
-        /* Mind Map Styles */
-        .mindmap {
-            position: relative;
-            min-height: 300px;
-            display: flex;
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
             justify-content: center;
-            align-items: flex-start;
-            padding-top: 50px;
+            align-items: center;
         }
         
-        .node {
-            position: absolute;
-            padding: 12px 20px;
+        .modal-content {
             background: white;
-            border: 2px solid var(--ai-color);
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            max-width: 200px;
-            word-wrap: break-word;
-            z-index: 2;
-        }
-        
-        .node:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-            z-index: 3;
-        }
-        
-        .node.central {
-            background: var(--ai-color);
-            color: white;
-            font-weight: 700;
-            font-size: 1.2rem;
-            border: none;
-            box-shadow: 0 6px 15px rgba(0, 206, 201, 0.4);
-        }
-        
-        .node.main-branch {
-            background: var(--secondary-color);
-            color: white;
-            border: none;
-        }
-        
-        .node.sub-topic {
-            background: white;
-            color: #2d3436;
-            border-color: #a29bfe;
-            font-size: 0.9rem;
-        }
-        
-        .connection {
-            position: absolute;
-            background: var(--secondary-color);
-            z-index: 1;
-            transform-origin: 0 0;
-        }
-        
-        footer {
-            text-align: center;
+            border-radius: 15px;
             padding: 30px;
-            color: #7f8c8d;
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--ai-color);
+            color: var(--ai-color);
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="ai-badge">
-                <i class="fas fa-robot"></i> AI BOT MIỄN PHÍ
+            <div class="user-badge" id="userBadge" style="display: none;">
+                <i class="fas fa-user"></i> <span id="usernameDisplay"></span>
             </div>
-            <h1>🤖 AI Mind Map Bot</h1>
-            <p style="font-size: 1.2rem; opacity: 0.95;">Tạo sơ đồ tư duy thông minh - Không cần API Key - Hoàn toàn miễn phí</p>
+            <h1>🤖 AI Mind Map Pro</h1>
+            <p>Đăng nhập • Chỉnh sửa • Tải ảnh • 3 lần miễn phí</p>
         </header>
         
         <div class="main-content">
-            <div class="input-panel">
-                <div class="config-section">
-                    <div class="config-title">
-                        <i class="fas fa-edit"></i> Nhập nội dung cần phân tích
-                    </div>
-                    <textarea class="text-input" id="textInput" placeholder="Nhập văn bản của bạn vào đây... Ví dụ: Sơ đồ tư duy là công cụ trực quan giúp tổ chức thông tin. Nó bắt đầu từ ý tưởng trung tâm, sau đó phát triển các nhánh ý tưởng phụ. Mỗi nhánh có thể có các ý con chi tiết hơn. Sơ đồ tư duy giúp kích thích tư duy sáng tạo và cải thiện trí nhớ..."></textarea>
-                    
-                    <div class="config-title">
-                        <i class="fas fa-cogs"></i> Cấu hình AI Bot
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <!-- Auth Panel -->
+                <div class="panel" id="authPanel">
+                    <div class="panel-title">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập / Đăng ký
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="login">Đăng nhập</div>
+                        <div class="tab" data-tab="register">Đăng ký</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="loginTab">
+                        <div class="auth-form">
+                            <input type="text" class="form-input" id="loginUsername" placeholder="Tên đăng nhập">
+                            <input type="password" class="form-input" id="loginPassword" placeholder="Mật khẩu">
+                            <button class="btn btn-primary" id="loginBtn">
+                                <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="registerTab">
+                        <div class="auth-form">
+                            <input type="text" class="form-input" id="registerUsername" placeholder="Tên đăng nhập">
+                            <input type="password" class="form-input" id="registerPassword" placeholder="Mật khẩu">
+                            <input type="email" class="form-input" id="registerEmail" placeholder="Email (tùy chọn)">
+                            <button class="btn btn-primary" id="registerBtn">
+                                <i class="fas fa-user-plus"></i> Đăng ký
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Info Panel -->
+                <div class="panel" id="userPanel" style="display: none;">
+                    <div class="panel-title">
+                        <i class="fas fa-user-circle"></i> Tài khoản
+                    </div>
+                    
+                    <div class="user-info">
+                        <p><strong>Tên:</strong> <span id="displayUsername"></span></p>
+                        <p><strong>Đã dùng:</strong> <span id="usageCount">0</span>/3 lần</p>
+                        <p><strong>Còn lại:</strong> <span id="remainingGenerations">3</span> lần</p>
+                        
+                        <div class="usage-bar">
+                            <div class="usage-progress" id="usageProgress" style="width: 0%"></div>
+                        </div>
+                        
+                        <button class="btn btn-danger" id="logoutBtn" style="width: 100%; margin-top: 15px;">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Input Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <i class="fas fa-edit"></i> Tạo sơ đồ mới
+                    </div>
+                    
+                    <textarea class="form-input" id="textInput" placeholder="Nhập văn bản cần phân tích..." style="min-height: 150px; resize: vertical;"></textarea>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
                         <div>
                             <label>Phong cách:</label>
-                            <select id="styleSelect" class="text-input" style="height: auto; padding: 10px;">
+                            <select class="form-input" id="styleSelect">
                                 <option value="balanced">Cân bằng</option>
                                 <option value="academic">Học thuật</option>
                                 <option value="creative">Sáng tạo</option>
@@ -335,265 +479,649 @@
                         </div>
                         <div>
                             <label>Độ chi tiết:</label>
-                            <select id="complexitySelect" class="text-input" style="height: auto; padding: 10px;">
+                            <select class="form-input" id="complexitySelect">
                                 <option value="medium">Trung bình</option>
                                 <option value="simple">Đơn giản</option>
                                 <option value="detailed">Chi tiết</option>
-                                <option value="comprehensive">Toàn diện</option>
                             </select>
                         </div>
                     </div>
-                </div>
-                
-                <button class="generate-btn" id="generateBtn">
-                    <i class="fas fa-robot"></i> AI BOT PHÂN TÍCH
-                </button>
-                
-                <div class="progress-container" id="progressContainer">
-                    <div class="progress-bar">
-                        <div class="progress" id="progress"></div>
+                    
+                    <button class="btn btn-primary" id="generateBtn" disabled>
+                        <i class="fas fa-robot"></i> Tạo Sơ Đồ
+                    </button>
+                    
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-bar">
+                            <div class="progress" id="progress"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">AI Bot đang phân tích...</div>
                     </div>
-                    <div class="progress-text" id="progressText">AI Bot đang phân tích văn bản...</div>
+                    
+                    <div class="status-message" id="statusMessage"></div>
                 </div>
                 
-                <div id="statusMessage" class="status-message"></div>
+                <!-- Saved Mindmaps Panel -->
+                <div class="panel" id="savedMapsPanel" style="display: none;">
+                    <div class="panel-title">
+                        <i class="fas fa-history"></i> Sơ đồ đã lưu
+                    </div>
+                    <div id="savedMapsList"></div>
+                </div>
             </div>
             
-            <div class="result-panel">
-                <div class="mindmap-container" id="mindmapContainer">
-                    <div class="empty-state">
-                        <i class="fas fa-project-diagram"></i>
-                        <h3>Chờ AI Bot phân tích</h3>
-                        <p>Nhập nội dung và nhấn "AI BOT PHÂN TÍCH" để xem sơ đồ tư duy thông minh</p>
-                    </div>
+            <!-- MAIN CONTENT -->
+            <div class="mindmap-container">
+                <div class="toolbar">
+                    <button class="btn btn-success" id="downloadBtn" disabled>
+                        <i class="fas fa-download"></i> Tải Ảnh
+                    </button>
+                    <button class="btn btn-warning" id="editToggleBtn" disabled>
+                        <i class="fas fa-edit"></i> Chỉnh Sửa
+                    </button>
+                    <button class="btn btn-primary" id="saveBtn" disabled>
+                        <i class="fas fa-save"></i> Lưu Thay Đổi
+                    </button>
+                    <button class="btn" id="resetBtn" disabled>
+                        <i class="fas fa-redo"></i> Làm Mới
+                    </button>
                 </div>
                 
-                <div class="ai-analysis" id="aiAnalysis" style="display: none;">
-                    <div class="config-title">
-                        <i class="fas fa-chart-bar"></i> Phân tích của AI Bot
+                <div class="mindmap" id="mindmap">
+                    <div class="empty-state">
+                        <i class="fas fa-project-diagram"></i>
+                        <h3>Chưa có sơ đồ</h3>
+                        <p>Đăng nhập và tạo sơ đồ tư duy đầu tiên của bạn!</p>
                     </div>
-                    <div id="analysisContent"></div>
                 </div>
             </div>
         </div>
-        
-        <footer>
-            <p>© 2024 AI Mind Map Bot | 🤖 Powered by Advanced NLP Algorithms | Miễn phí 100%</p>
-        </footer>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
+        // STATE MANAGEMENT
+        let currentUser = null;
+        let currentMindmap = null;
+        let isEditing = false;
+        let originalMindmapData = null;
+
+        // DOM ELEMENTS
+        const authPanel = document.getElementById('authPanel');
+        const userPanel = document.getElementById('userPanel');
+        const userBadge = document.getElementById('userBadge');
+        const usernameDisplay = document.getElementById('usernameDisplay');
+        const displayUsername = document.getElementById('displayUsername');
+        const usageCount = document.getElementById('usageCount');
+        const remainingGenerations = document.getElementById('remainingGenerations');
+        const usageProgress = document.getElementById('usageProgress');
+        const savedMapsPanel = document.getElementById('savedMapsPanel');
+        const savedMapsList = document.getElementById('savedMapsList');
+        
+        const generateBtn = document.getElementById('generateBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const editToggleBtn = document.getElementById('editToggleBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        const progressContainer = document.getElementById('progressContainer');
+        const progress = document.getElementById('progress');
+        const progressText = document.getElementById('progressText');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // INITIALIZATION
         document.addEventListener('DOMContentLoaded', function() {
-            const textInput = document.getElementById('textInput');
-            const styleSelect = document.getElementById('styleSelect');
-            const complexitySelect = document.getElementById('complexitySelect');
-            const generateBtn = document.getElementById('generateBtn');
-            const progressContainer = document.getElementById('progressContainer');
-            const progress = document.getElementById('progress');
-            const progressText = document.getElementById('progressText');
-            const statusMessage = document.getElementById('statusMessage');
-            const mindmapContainer = document.getElementById('mindmapContainer');
-            const aiAnalysis = document.getElementById('aiAnalysis');
-            const analysisContent = document.getElementById('analysisContent');
-            
-            // AI Bot generation
-            generateBtn.addEventListener('click', async function() {
-                const text = textInput.value.trim();
-                const style = styleSelect.value;
-                const complexity = complexitySelect.value;
-                
-                if (!text) {
-                    showStatus('Vui lòng nhập nội dung cần phân tích', 'error');
-                    return;
-                }
-                
-                if (text.length < 20) {
-                    showStatus('Văn bản quá ngắn. Vui lòng nhập ít nhất 20 ký tự.', 'warning');
-                    return;
-                }
-                
-                // Show progress
-                progressContainer.style.display = 'block';
-                progress.style.width = '10%';
-                progressText.textContent = '🤖 AI Bot đang khởi động...';
-                generateBtn.disabled = true;
-                
-                try {
-                    // Simulate AI processing steps
-                    const steps = [
-                        'Đang phân tích cấu trúc văn bản...',
-                        'Đang trích xuất từ khóa quan trọng...',
-                        'Đang đánh giá mức độ quan trọng câu...',
-                        'Đang nhóm ý theo chủ đề...',
-                        'Đang tạo cấu trúc sơ đồ tư duy...',
-                        'Hoàn thành!'
-                    ];
-                    
-                    for (let i = 0; i < steps.length; i++) {
-                        progress.style.width = `${10 + (i * 15)}%`;
-                        progressText.textContent = steps[i];
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-                    
-                    // Call AI Bot function
-                    const response = await fetch('/.netlify/functions/ai-mindmap-bot', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            text: text,
-                            style: style,
-                            complexity: complexity
-                        })
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`AI Bot error: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    
-                    // Render mind map
-                    renderMindMap(data);
-                    
-                    // Show AI analysis
-                    showAIAnalysis(data);
-                    
-                    progress.style.width = '100%';
-                    progressText.textContent = '✅ Phân tích hoàn thành!';
-                    
-                    showStatus('AI Bot đã tạo sơ đồ tư duy thành công!', 'success');
-                    
-                } catch (error) {
-                    console.error('AI Bot error:', error);
-                    showStatus('Lỗi: ' + error.message, 'error');
-                } finally {
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-                        generateBtn.disabled = false;
-                    }, 1000);
-                }
-            });
-            
-            function renderMindMap(data) {
-                mindmapContainer.innerHTML = '';
-                const mindmap = document.createElement('div');
-                mindmap.className = 'mindmap';
-                
-                const centerX = mindmapContainer.offsetWidth / 2;
-                const centerY = 100;
-                
-                // Central topic
-                const centralNode = createNode(data.centralTopic, centerX, centerY, 'central');
-                mindmap.appendChild(centralNode);
-                
-                // Main branches
-                const branchCount = data.mainBranches.length;
-                const angleStep = (2 * Math.PI) / branchCount;
-                
-                data.mainBranches.forEach((branch, branchIndex) => {
-                    const angle = branchIndex * angleStep;
-                    const branchRadius = 150;
-                    const branchX = centerX + Math.cos(angle) * branchRadius;
-                    const branchY = centerY + Math.sin(angle) * branchRadius;
-                    
-                    // Main branch node
-                    const branchNode = createNode(branch.title, branchX, branchY, 'main-branch');
-                    mindmap.appendChild(branchNode);
-                    
-                    // Connection from central to branch
-                    createConnection(centerX, centerY, branchX, branchY, mindmap);
-                    
-                    // Sub topics
-                    const subTopicCount = branch.subTopics.length;
-                    const subAngleStep = Math.PI / (subTopicCount + 1);
-                    const startAngle = angle - Math.PI/4;
-                    
-                    branch.subTopics.forEach((subTopic, subIndex) => {
-                        const subAngle = startAngle + (subIndex + 1) * subAngleStep;
-                        const subRadius = 100;
-                        const subX = branchX + Math.cos(subAngle) * subRadius;
-                        const subY = branchY + Math.sin(subAngle) * subRadius;
-                        
-                        // Sub topic node
-                        const subNode = createNode(subTopic, subX, subY, 'sub-topic');
-                        mindmap.appendChild(subNode);
-                        
-                        // Connection from branch to sub topic
-                        createConnection(branchX, branchY, subX, subY, mindmap);
-                    });
+            initializeApp();
+            setupEventListeners();
+        });
+
+        function initializeApp() {
+            // Check if user is logged in
+            const savedUser = localStorage.getItem('mindmap_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showUserInterface();
+                loadSavedMindmaps();
+            }
+        }
+
+        function setupEventListeners() {
+            // Auth tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
                 });
-                
-                mindmapContainer.appendChild(mindmap);
-            }
+            });
+
+            // Auth buttons
+            document.getElementById('loginBtn').addEventListener('click', login);
+            document.getElementById('registerBtn').addEventListener('click', register);
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+
+            // Main functionality
+            document.getElementById('generateBtn').addEventListener('click', generateMindmap);
+            document.getElementById('downloadBtn').addEventListener('click', downloadAsImage);
+            document.getElementById('editToggleBtn').addEventListener('click', toggleEditing);
+            document.getElementById('saveBtn').addEventListener('click', saveChanges);
+            document.getElementById('resetBtn').addEventListener('click', resetMindmap);
+
+            // Enable generate button when text is entered
+            document.getElementById('textInput').addEventListener('input', function() {
+                generateBtn.disabled = !this.value.trim() || !currentUser;
+            });
+        }
+
+        // AUTHENTICATION FUNCTIONS
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            function createNode(text, x, y, className) {
-                const node = document.createElement('div');
-                node.className = `node ${className}`;
-                node.textContent = text;
-                node.style.left = `${x}px`;
-                node.style.top = `${y}px`;
-                node.style.transform = 'translate(-50%, -50%)';
-                return node;
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!username || !password) {
+                showStatus('Vui lòng nhập đầy đủ thông tin', 'error');
+                return;
             }
-            
-            function createConnection(x1, y1, x2, y2, parent) {
-                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+            try {
+                const response = await fetch('/.netlify/functions/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
                 
-                const connection = document.createElement('div');
-                connection.className = 'connection';
-                connection.style.width = `${length}px`;
-                connection.style.left = `${x1}px`;
-                connection.style.top = `${y1}px`;
-                connection.style.transform = `rotate(${angle}deg)`;
-                
-                parent.appendChild(connection);
+                if (result.success) {
+                    currentUser = result.user;
+                    localStorage.setItem('mindmap_user', JSON.stringify(currentUser));
+                    showUserInterface();
+                    loadSavedMindmaps();
+                    showStatus('Đăng nhập thành công!', 'success');
+                } else {
+                    showStatus('Lỗi: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Lỗi kết nối: ' + error.message, 'error');
             }
-            
-            function showAIAnalysis(data) {
-                aiAnalysis.style.display = 'block';
-                
-                const analysis = data.analysis;
-                const confidence = Math.round(analysis.confidence * 100);
-                
-                analysisContent.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
-                            <strong>Số câu phân tích:</strong> ${analysis.totalSentences}
-                        </div>
-                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
-                            <strong>Tổng số từ:</strong> ${analysis.totalWords}
-                        </div>
-                    </div>
-                    <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-                        <strong>Độ tin cậy AI:</strong> 
-                        <div style="background: #e9ecef; border-radius: 10px; margin-top: 5px; overflow: hidden;">
-                            <div style="background: #00cec9; height: 10px; width: ${confidence}%; border-radius: 10px;"></div>
-                        </div>
-                        <small>${confidence}% - Dựa trên độ phức tạp văn bản</small>
-                    </div>
-                    <div>
-                        <strong>Từ khóa chính:</strong> 
-                        ${analysis.keywords.map(keyword => 
-                            `<span style="background: #00cec9; color: white; padding: 3px 8px; border-radius: 12px; margin: 2px; display: inline-block; font-size: 0.8rem;">${keyword}</span>`
-                        ).join('')}
-                    </div>
-                `;
+        }
+
+        async function register() {
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+
+            if (!username || !password) {
+                showStatus('Vui lòng nhập tên đăng nhập và mật khẩu', 'error');
+                return;
             }
+
+            try {
+                const response = await fetch('/.netlify/functions/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'register',
+                        username: username,
+                        password: password,
+                        email: email
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('Đăng ký thành công! Vui lòng đăng nhập.', 'success');
+                    switchTab('login');
+                    // Auto-fill login form
+                    document.getElementById('loginUsername').value = username;
+                    document.getElementById('loginPassword').value = '';
+                } else {
+                    showStatus('Lỗi: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Lỗi kết nối: ' + error.message, 'error');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            currentMindmap = null;
+            localStorage.removeItem('mindmap_user');
+            showAuthInterface();
+            resetMindmap();
+            showStatus('Đã đăng xuất', 'success');
+        }
+
+        function showAuthInterface() {
+            authPanel.style.display = 'block';
+            userPanel.style.display = 'none';
+            userBadge.style.display = 'none';
+            savedMapsPanel.style.display = 'none';
+            generateBtn.disabled = true;
+            disableToolbar();
+        }
+
+        function showUserInterface() {
+            authPanel.style.display = 'none';
+            userPanel.style.display = 'block';
+            userBadge.style.display = 'flex';
+            savedMapsPanel.style.display = 'block';
             
-            function showStatus(message, type) {
-                statusMessage.textContent = message;
-                statusMessage.className = 'status-message';
-                statusMessage.classList.add(`status-${type}`);
-                statusMessage.style.display = 'block';
+            usernameDisplay.textContent = currentUser.username;
+            displayUsername.textContent = currentUser.username;
+            usageCount.textContent = currentUser.usageCount;
+            remainingGenerations.textContent = currentUser.remainingGenerations;
+            
+            const usagePercentage = (currentUser.usageCount / 3) * 100;
+            usageProgress.style.width = `${usagePercentage}%`;
+            
+            generateBtn.disabled = !document.getElementById('textInput').value.trim();
+        }
+
+        // MINDMAP FUNCTIONS
+        async function generateMindmap() {
+            if (!currentUser) {
+                showStatus('Vui lòng đăng nhập', 'error');
+                return;
+            }
+
+            if (currentUser.remainingGenerations <= 0) {
+                showStatus('Bạn đã sử dụng hết 3 lần miễn phí!', 'error');
+                return;
+            }
+
+            const text = document.getElementById('textInput').value.trim();
+            const style = document.getElementById('styleSelect').value;
+            const complexity = document.getElementById('complexitySelect').value;
+
+            if (!text) {
+                showStatus('Vui lòng nhập nội dung', 'error');
+                return;
+            }
+
+            // Show progress
+            progressContainer.style.display = 'block';
+            progress.style.width = '10%';
+            progressText.textContent = '🤖 AI Bot đang phân tích...';
+            generateBtn.disabled = true;
+
+            try {
+                const steps = [
+                    'Đang phân tích cấu trúc văn bản...',
+                    'Đang trích xuất từ khóa quan trọng...',
+                    'Đang tạo cấu trúc sơ đồ tư duy...',
+                    'Đang tối ưu hóa bố cục...',
+                    'Hoàn thành!'
+                ];
+
+                for (let i = 0; i < steps.length; i++) {
+                    progress.style.width = `${10 + (i * 22)}%`;
+                    progressText.textContent = steps[i];
+                    await new Promise(resolve => setTimeout(resolve, 600));
+                }
+
+                const response = await fetch('/.netlify/functions/ai-mindmap-bot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        style: style,
+                        complexity: complexity,
+                        username: currentUser.username,
+                        saveToAccount: true
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'AI Bot error');
+                }
+
+                const data = await response.json();
+                currentMindmap = data;
+                originalMindmapData = JSON.parse(JSON.stringify(data)); // Deep copy for reset
+
+                renderMindMap(data);
+                enableToolbar();
+                
+                // Update user info
+                currentUser.usageCount = data.usage.used;
+                currentUser.remainingGenerations = data.usage.remaining;
+                localStorage.setItem('mindmap_user', JSON.stringify(currentUser));
+                showUserInterface();
+
+                progress.style.width = '100%';
+                progressText.textContent = '✅ Tạo sơ đồ thành công!';
+                showStatus(`Đã tạo sơ đồ! Còn ${data.usage.remaining} lần sử dụng.`, 'success');
+
+            } catch (error) {
+                console.error('Generation error:', error);
+                showStatus('Lỗi: ' + error.message, 'error');
+            } finally {
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    generateBtn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        // RENDER MINDMAP WITH SMART LAYOUT
+        function renderMindMap(data) {
+            const mindmap = document.getElementById('mindmap');
+            mindmap.innerHTML = '';
+            mindmap.style.position = 'relative';
+            mindmap.style.width = '100%';
+            mindmap.style.height = '600px';
+            mindmap.style.background = '#f8f9fa';
+
+            if (!data || !data.centralTopic) {
+                mindmap.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Lỗi tạo sơ đồ</h3></div>';
+                return;
+            }
+
+            const centerX = mindmap.offsetWidth / 2;
+            const centerY = mindmap.offsetHeight / 2;
+
+            // Create central node
+            const centralNode = createNode(data.centralTopic, centerX, centerY, 'central');
+            mindmap.appendChild(centralNode);
+
+            // Create main branches with smart layout
+            const branchCount = data.mainBranches.length;
+            const baseRadius = Math.min(centerX, centerY) * 0.4;
+
+            data.mainBranches.forEach((branch, index) => {
+                const angle = (2 * Math.PI * index) / branchCount;
+                const branchX = centerX + Math.cos(angle) * baseRadius;
+                const branchY = centerY + Math.sin(angle) * baseRadius;
+
+                // Main branch node
+                const branchNode = createNode(branch.title, branchX, branchY, 'main-branch');
+                mindmap.appendChild(branchNode);
+
+                // Connection from center to branch
+                createConnection(centerX, centerY, branchX, branchY, mindmap);
+
+                // Create sub-topics
+                const subTopicCount = branch.subTopics.length;
+                const subBaseRadius = baseRadius * 0.6;
+
+                branch.subTopics.forEach((subTopic, subIndex) => {
+                    const subAngle = angle - Math.PI/4 + (subIndex * Math.PI/2) / (subTopicCount + 1);
+                    const subX = branchX + Math.cos(subAngle) * subBaseRadius;
+                    const subY = branchY + Math.sin(subAngle) * subBaseRadius;
+
+                    const subNode = createNode(subTopic, subX, subY, 'sub-topic');
+                    mindmap.appendChild(subNode);
+
+                    createConnection(branchX, branchY, subX, subY, mindmap);
+                });
+            });
+
+            // Add smooth animations
+            addSmoothAnimations();
+        }
+
+        function createNode(text, x, y, className) {
+            const node = document.createElement('div');
+            node.className = `node ${className}`;
+            node.textContent = text;
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            node.style.transform = 'translate(-50%, -50%)';
+            node.style.position = 'absolute';
+            node.style.zIndex = '2';
+            
+            // Make editable when in edit mode
+            if (isEditing) {
+                node.setAttribute('contenteditable', 'true');
+                node.addEventListener('input', function() {
+                    this.classList.add('editing');
+                });
+            }
+
+            return node;
+        }
+
+        function createConnection(x1, y1, x2, y2, parent) {
+            const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            const connection = document.createElement('div');
+            connection.className = 'connection';
+            connection.style.width = `${length}px`;
+            connection.style.left = `${x1}px`;
+            connection.style.top = `${y1}px`;
+            connection.style.transform = `rotate(${angle}deg)`;
+            connection.style.position = 'absolute';
+            connection.style.zIndex = '1';
+            connection.setAttribute('data-length', length);
+            
+            parent.appendChild(connection);
+        }
+
+        function addSmoothAnimations() {
+            const nodes = document.querySelectorAll('.node');
+            nodes.forEach((node, index) => {
+                node.style.opacity = '0';
+                node.style.transform = 'translate(-50%, -50%) scale(0.8)';
                 
                 setTimeout(() => {
-                    statusMessage.style.display = 'none';
-                }, 5000);
+                    node.style.transition = 'all 0.5s ease';
+                    node.style.opacity = '1';
+                    node.style.transform = 'translate(-50%, -50%) scale(1)';
+                }, index * 100);
+            });
+
+            const connections = document.querySelectorAll('.connection');
+            connections.forEach((conn, index) => {
+                conn.style.width = '0';
+                setTimeout(() => {
+                    conn.style.transition = 'width 0.8s ease';
+                    conn.style.width = conn.getAttribute('data-length') + 'px';
+                }, index * 150);
+            });
+        }
+
+        // EDITING FUNCTIONS
+        function toggleEditing() {
+            isEditing = !isEditing;
+            const nodes = document.querySelectorAll('.node');
+            
+            if (isEditing) {
+                editToggleBtn.innerHTML = '<i class="fas fa-times"></i> Thoát Chỉnh Sửa';
+                editToggleBtn.classList.remove('btn-warning');
+                editToggleBtn.classList.add('btn-danger');
+                saveBtn.disabled = false;
+                
+                nodes.forEach(node => {
+                    node.setAttribute('contenteditable', 'true');
+                    node.style.cursor = 'text';
+                });
+                
+                showStatus('Chế độ chỉnh sửa: Click vào các khung để thay đổi nội dung', 'success');
+            } else {
+                editToggleBtn.innerHTML = '<i class="fas fa-edit"></i> Chỉnh Sửa';
+                editToggleBtn.classList.remove('btn-danger');
+                editToggleBtn.classList.add('btn-warning');
+                saveBtn.disabled = true;
+                
+                nodes.forEach(node => {
+                    node.setAttribute('contenteditable', 'false');
+                    node.style.cursor = 'pointer';
+                    node.classList.remove('editing');
+                });
+                
+                showStatus('Đã thoát chế độ chỉnh sửa', 'success');
             }
-        });
+        }
+
+        async function saveChanges() {
+            if (!currentMindmap) return;
+
+            // Collect updated content
+            const nodes = document.querySelectorAll('.node');
+            const centralNode = Array.from(nodes).find(node => node.classList.contains('central'));
+            const mainBranchNodes = Array.from(nodes).filter(node => node.classList.contains('main-branch'));
+            const subTopicNodes = Array.from(nodes).filter(node => node.classList.contains('sub-topic'));
+
+            // Update mindmap data structure
+            currentMindmap.centralTopic = centralNode?.textContent || currentMindmap.centralTopic;
+            
+            mainBranchNodes.forEach((branchNode, branchIndex) => {
+                if (currentMindmap.mainBranches[branchIndex]) {
+                    currentMindmap.mainBranches[branchIndex].title = branchNode.textContent;
+                    
+                    // Find sub-topics for this branch
+                    const branchSubTopics = subTopicNodes.filter((_, index) => 
+                        Math.floor(index / 3) === branchIndex
+                    );
+                    
+                    branchSubTopics.forEach((subNode, subIndex) => {
+                        if (currentMindmap.mainBranches[branchIndex].subTopics[subIndex]) {
+                            currentMindmap.mainBranches[branchIndex].subTopics[subIndex] = subNode.textContent;
+                        }
+                    });
+                }
+            });
+
+            showStatus('Đã lưu thay đổi!', 'success');
+            toggleEditing(); // Exit edit mode
+        }
+
+        function resetMindmap() {
+            if (originalMindmapData) {
+                currentMindmap = JSON.parse(JSON.stringify(originalMindmapData));
+                renderMindMap(currentMindmap);
+                showStatus('Đã khôi phục sơ đồ gốc', 'success');
+            }
+        }
+
+        // DOWNLOAD FUNCTION
+        async function downloadAsImage() {
+            const mindmap = document.getElementById('mindmap');
+            
+            try {
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                downloadBtn.disabled = true;
+
+                const canvas = await html2canvas(mindmap, {
+                    backgroundColor: '#f8f9fa',
+                    scale: 2, // Higher quality
+                    useCORS: true
+                });
+
+                const link = document.createElement('a');
+                link.download = `mindmap-${currentUser.username}-${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                showStatus('Đã tải ảnh thành công!', 'success');
+            } catch (error) {
+                showStatus('Lỗi tải ảnh: ' + error.message, 'error');
+            } finally {
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i> Tải Ảnh';
+                downloadBtn.disabled = false;
+            }
+        }
+
+        // SAVED MINDMAPS
+        async function loadSavedMindmaps() {
+            if (!currentUser) return;
+
+            try {
+                const response = await fetch('/.netlify/functions/get-user-mindmaps', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser.username })
+                });
+
+                if (response.ok) {
+                    const mindmaps = await response.json();
+                    displaySavedMindmaps(mindmaps);
+                }
+            } catch (error) {
+                console.error('Error loading saved mindmaps:', error);
+            }
+        }
+
+        function displaySavedMindmaps(mindmaps) {
+            if (!mindmaps || mindmaps.length === 0) {
+                savedMapsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Chưa có sơ đồ nào được lưu</p>';
+                return;
+            }
+
+            savedMapsList.innerHTML = mindmaps.map(mindmap => `
+                <div class="saved-map-item" style="background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid var(--ai-color); cursor: pointer;" onclick="loadSavedMindmap('${mindmap.id}')">
+                    <strong>${mindmap.data.centralTopic.substring(0, 50)}${mindmap.data.centralTopic.length > 50 ? '...' : ''}</strong>
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        ${new Date(mindmap.createdAt).toLocaleDateString('vi-VN')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadSavedMindmap(mindmapId) {
+            try {
+                const response = await fetch('/.netlify/functions/get-mindmap', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mindmapId: mindmapId })
+                });
+
+                if (response.ok) {
+                    const mindmap = await response.json();
+                    currentMindmap = mindmap.data;
+                    originalMindmapData = JSON.parse(JSON.stringify(mindmap.data));
+                    renderMindMap(mindmap.data);
+                    enableToolbar();
+                    showStatus('Đã tải sơ đồ đã lưu', 'success');
+                }
+            } catch (error) {
+                showStatus('Lỗi tải sơ đồ: ' + error.message, 'error');
+            }
+        }
+
+        // UTILITY FUNCTIONS
+        function enableToolbar() {
+            downloadBtn.disabled = false;
+            editToggleBtn.disabled = false;
+            resetBtn.disabled = false;
+        }
+
+        function disableToolbar() {
+            downloadBtn.disabled = true;
+            editToggleBtn.disabled = true;
+            saveBtn.disabled = true;
+            resetBtn.disabled = true;
+        }
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message';
+            statusMessage.classList.add(`status-${type}`);
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Make loadSavedMindmap available globally
+        window.loadSavedMindmap = loadSavedMindmap;
     </script>
 </body>
 </html>
