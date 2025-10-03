@@ -1,12 +1,6 @@
 {
-  "name": "mindmap-ai-functions",
+  "name": "ai-mindmap-free",
   "version": "1.0.0",
-  "description": "Netlify Functions for AI Mind Map System",
-  "main": "ai-mindmap-bot.js",
-  "dependencies": {
-    "node-fetch": "^2.6.7"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+  "description": "AI Mind Map Generator - Completely Free",
+  "main": "index.html"
 }
