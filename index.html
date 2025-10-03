@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 AI Mind Map Pro - Client ID & MoMo Auto</title>
+    <title>🤖 AI Mind Map - Hoàn Toàn Miễn Phí</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -13,7 +15,7 @@
             --ai-color: #00cec9;
             --success-color: #00b894;
             --warning-color: #fdcb6e;
-            --danger-color: #e17055;
+            --error-color: #e17055;
         }
         
         * {
@@ -32,7 +34,7 @@
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -42,13 +44,13 @@
         
         header {
             text-align: center;
-            padding: 30px;
-            background: linear-gradient(135deg, var(--ai-color), var(--primary-color));
+            padding: 40px;
+            background: linear-gradient(135deg, var(--ai-color), var(--success-color));
             color: white;
             position: relative;
         }
         
-        .client-badge {
+        .free-badge {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -60,55 +62,40 @@
         }
         
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 2.8rem;
+            margin-bottom: 15px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .main-content {
-            padding: 30px;
+            padding: 40px;
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 30px;
-            min-height: 800px;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            min-height: 600px;
         }
         
-        @media (max-width: 1024px) {
+        @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
             }
         }
         
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-        
-        .panel {
+        .input-panel {
             background: #f8f9fa;
             border-radius: 15px;
-            padding: 25px;
+            padding: 30px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
         
-        .panel-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 2px solid var(--ai-color);
-            padding-bottom: 10px;
-        }
-        
-        .client-info {
+        .usage-info {
             background: white;
             padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid var(--success-color);
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--ai-color);
+            text-align: center;
         }
         
         .usage-bar {
@@ -121,30 +108,44 @@
         
         .usage-progress {
             height: 100%;
-            background: linear-gradient(90deg, var(--success-color), var(--ai-color));
+            background: linear-gradient(90deg, var(--ai-color), var(--success-color));
             border-radius: 10px;
             transition: width 0.3s;
         }
         
-        .form-input {
-            width: 100%;
+        .config-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .config-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .mode-selector {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mode-btn {
+            flex: 1;
             padding: 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: var(--ai-color);
-            box-shadow: 0 0 0 3px rgba(0, 206, 201, 0.1);
-        }
-        
-        .btn {
-            padding: 15px 25px;
+            text-align: center;
+            background: white;
             border: none;
-            border-radius: 10px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -153,155 +154,160 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            text-decoration: none;
         }
         
-        .btn-primary {
-            background: linear-gradient(135deg, var(--ai-color), var(--primary-color));
+        .mode-btn.active {
+            background: var(--primary-color);
             color: white;
         }
         
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+        .input-area {
+            display: none;
+            margin-bottom: 20px;
         }
         
-        .btn-success {
-            background: var(--success-color);
+        .input-area.active {
+            display: block;
+        }
+        
+        .text-input {
+            width: 100%;
+            min-height: 200px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 1rem;
+            resize: vertical;
+            line-height: 1.6;
+            transition: all 0.3s;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: var(--ai-color);
+            box-shadow: 0 0 0 3px rgba(0, 206, 201, 0.1);
+        }
+        
+        .char-count {
+            text-align: right;
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .image-upload-area {
+            border: 2px dashed var(--secondary-color);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(162, 155, 254, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .image-upload-area:hover {
+            background: rgba(162, 155, 254, 0.1);
+        }
+        
+        .image-upload-area i {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .image-preview {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .generate-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--ai-color), var(--success-color));
             color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
         
-        .btn-warning {
-            background: var(--warning-color);
-            color: #2d3436;
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 206, 201, 0.3);
         }
         
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
-        }
-        
-        .btn:disabled {
+        .generate-btn:disabled {
             background: #bdc3c7;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
         
-        .package-option {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 15px 0;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: white;
-        }
-        
-        .package-option:hover {
-            border-color: var(--ai-color);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .package-option.selected {
-            border-color: var(--ai-color);
-            background: rgba(0, 206, 201, 0.05);
-        }
-        
-        .package-price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 10px 0;
-        }
-        
-        .mindmap-container {
+        .result-panel {
             background: #f8f9fa;
             border-radius: 15px;
-            padding: 25px;
+            padding: 30px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            position: relative;
-            min-height: 700px;
             display: flex;
             flex-direction: column;
         }
         
-        .toolbar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .mindmap {
+        .mindmap-container {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            min-height: 400px;
             position: relative;
-            width: 100%;
-            height: 600px;
-            background: white;
-            border-radius: 10px;
             overflow: auto;
-            border: 2px dashed #e9ecef;
         }
         
-        .node {
-            position: absolute;
-            padding: 15px 20px;
+        .ai-analysis {
             background: white;
-            border: 2px solid var(--ai-color);
+            padding: 20px;
             border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            max-width: 200px;
-            min-width: 120px;
-            word-wrap: break-word;
-            z-index: 2;
-            cursor: pointer;
-        }
-        
-        .node:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            z-index: 10;
-        }
-        
-        .node.central {
-            background: linear-gradient(135deg, var(--ai-color), var(--primary-color));
-            color: white;
-            font-weight: 700;
-            font-size: 1.3rem;
-            border: none;
-            box-shadow: 0 8px 25px rgba(0, 206, 201, 0.4);
-            z-index: 5;
-        }
-        
-        .node.main-branch {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            font-weight: 600;
-        }
-        
-        .node.sub-topic {
-            background: white;
-            color: #2d3436;
-            border-color: var(--secondary-color);
-            font-size: 0.95rem;
-        }
-        
-        .node.editing {
-            background: #fff3cd;
-            border-color: var(--warning-color);
-            box-shadow: 0 0 0 3px rgba(253, 203, 110, 0.3);
-        }
-        
-        .connection {
-            position: absolute;
-            background: var(--secondary-color);
-            height: 2px;
-            z-index: 1;
-            transform-origin: 0 0;
+            margin-top: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--ai-color);
         }
         
         .progress-container {
@@ -319,10 +325,16 @@
         
         .progress {
             height: 100%;
-            background: linear-gradient(90deg, var(--ai-color), var(--primary-color));
+            background: linear-gradient(90deg, var(--ai-color), var(--success-color));
             width: 0%;
             transition: width 0.4s;
             border-radius: 10px;
+        }
+        
+        .progress-text {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
         }
         
         .status-message {
@@ -346,9 +358,15 @@
             border: 1px solid #f5c6cb;
         }
         
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
         .empty-state {
             text-align: center;
-            padding: 80px 20px;
+            padding: 60px 20px;
             color: #7f8c8d;
         }
         
@@ -358,99 +376,176 @@
             margin-bottom: 20px;
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
         }
         
-        .modal-content {
+        .action-btn {
+            flex: 1;
+            padding: 15px;
             background: white;
-            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .action-btn.primary {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        /* Mind Map Smart Layout */
+        .mindmap {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .node {
+            position: absolute;
+            padding: 12px 18px;
+            background: white;
+            border: 2px solid var(--ai-color);
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            max-width: 180px;
+            min-width: 120px;
+            word-wrap: break-word;
+            z-index: 2;
+            cursor: pointer;
+        }
+        
+        .node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        
+        .node.central {
+            background: linear-gradient(135deg, var(--ai-color), var(--success-color));
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            border: none;
+            box-shadow: 0 8px 25px rgba(0, 206, 201, 0.4);
+            z-index: 5;
+        }
+        
+        .node.main-branch {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .node.sub-topic {
+            background: white;
+            color: #2d3436;
+            border-color: var(--secondary-color);
+            font-size: 0.95rem;
+        }
+        
+        .connection {
+            position: absolute;
+            background: #b2bec3;
+            height: 2px;
+            z-index: 1;
+            transform-origin: 0 0;
+        }
+        
+        footer {
+            text-align: center;
             padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
+            color: #7f8c8d;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="client-badge" id="clientBadge">
-                <i class="fas fa-id-card"></i> Client ID: <span id="clientIdDisplay">Đang tạo...</span>
+            <div class="free-badge">
+                <i class="fas fa-gift"></i> HOÀN TOÀN MIỄN PHÍ
             </div>
-            <h1>🤖 AI Mind Map Pro</h1>
-            <p>Client ID • MoMo Tự động • 3 lượt free • 20K = 22 lượt</p>
+            <h1>🤖 AI Mind Map Free</h1>
+            <p style="font-size: 1.2rem; opacity: 0.95;">10 lần sử dụng mỗi ngày • Hỗ trợ ảnh & văn bản • Không cần đăng ký</p>
         </header>
         
         <div class="main-content">
-            <!-- SIDEBAR -->
-            <div class="sidebar">
-                <!-- Client Info Panel -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-user-circle"></i> Thông tin Client
+            <div class="input-panel">
+                <div class="usage-info">
+                    <div class="config-title">
+                        <i class="fas fa-chart-line"></i> Số lần sử dụng hôm nay
+                    </div>
+                    <div id="usageText">Đang tải...</div>
+                    <div class="usage-bar">
+                        <div class="usage-progress" id="usageProgress" style="width: 0%"></div>
+                    </div>
+                    <small>Bạn có 10 lần sử dụng miễn phí mỗi ngày</small>
+                </div>
+                
+                <div class="config-section">
+                    <div class="config-title">
+                        <i class="fas fa-edit"></i> Chọn chế độ nhập liệu
+                    </div>
+                    <div class="mode-selector">
+                        <button class="mode-btn active" data-mode="text">
+                            <i class="fas fa-font"></i> Văn bản
+                        </button>
+                        <button class="mode-btn" data-mode="image">
+                            <i class="fas fa-image"></i> Hình ảnh
+                        </button>
                     </div>
                     
-                    <div class="client-info">
-                        <p><strong>Client ID:</strong> <span id="displayClientId"></span></p>
-                        <p><strong>Đã dùng:</strong> <span id="usageCount">0</span>/<span id="totalGenerations">3</span> lượt</p>
-                        <p><strong>Còn lại:</strong> <span id="remainingGenerations">3</span> lượt</p>
-                        
-                        <div class="usage-bar">
-                            <div class="usage-progress" id="usageProgress" style="width: 0%"></div>
+                    <div class="input-area active" id="text-input-area">
+                        <textarea class="text-input" id="textInput" placeholder="Nhập văn bản của bạn vào đây (tối đa 1500 chữ)... Ví dụ: Học tập hiệu quả cần có ba yếu tố chính: Thứ nhất là quản lý thời gian hợp lý, biết sắp xếp lịch học và nghỉ ngơi. Thứ hai là phương pháp học tập phù hợp như sơ đồ tư duy, ghi chú ngắn gọn và luyện tập thường xuyên. Thứ ba là giữ tinh thần thoải mái, ăn uống đủ chất và ngủ đủ giấc..."></textarea>
+                        <div class="char-count">
+                            <span id="charCount">0</span>/1500 chữ
+                        </div>
+                    </div>
+                    
+                    <div class="input-area" id="image-input-area">
+                        <div class="image-upload-area" id="imageUploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Nhấn để chọn hình ảnh (tối đa 3 ảnh)</p>
+                            <p><small>Hỗ trợ: JPG, PNG, GIF - Tối đa 5MB/ảnh</small></p>
+                            <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple>
                         </div>
                         
-                        <button class="btn btn-warning" id="refreshClientBtn" style="width: 100%; margin-top: 10px;">
-                            <i class="fas fa-sync-alt"></i> Làm mới
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Package Panel -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-shopping-cart"></i> Mua thêm lượt
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            <!-- Ảnh preview sẽ hiển thị ở đây -->
+                        </div>
                     </div>
                     
-                    <div class="package-option selected" data-package="basic">
-                        <h3>GÓI 20.000 VND</h3>
-                        <div class="package-price">20.000 VND</div>
-                        <p>Nhận ngay <strong>22 lượt</strong> tạo sơ đồ</p>
-                        <ul>
-                            <li>✅ Tự động kích hoạt ngay</li>
-                            <li>✅ Thanh toán qua MoMo</li>
-                            <li>✅ Không giới hạn thời gian</li>
-                        </ul>
-                        <button class="btn btn-success buy-package-btn" style="width: 100%; margin-top: 15px;">
-                            <i class="fas fa-mobile-alt"></i> Mua ngay với MoMo
-                        </button>
+                    <div class="config-title" style="margin-top: 20px;">
+                        <i class="fas fa-cogs"></i> Cấu hình AI
                     </div>
                     
-                    <div class="status-message" id="paymentStatus"></div>
-                </div>
-                
-                <!-- Input Panel -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-edit"></i> Tạo sơ đồ mới
-                    </div>
-                    
-                    <textarea class="form-input" id="textInput" placeholder="Nhập văn bản cần phân tích..." style="min-height: 150px; resize: vertical;"></textarea>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div>
                             <label>Phong cách:</label>
-                            <select class="form-input" id="styleSelect">
+                            <select id="styleSelect" class="text-input" style="height: auto; padding: 10px; margin-top: 5px;">
                                 <option value="balanced">Cân bằng</option>
                                 <option value="academic">Học thuật</option>
                                 <option value="creative">Sáng tạo</option>
@@ -459,760 +554,622 @@
                         </div>
                         <div>
                             <label>Độ chi tiết:</label>
-                            <select class="form-input" id="complexitySelect">
+                            <select id="complexitySelect" class="text-input" style="height: auto; padding: 10px; margin-top: 5px;">
                                 <option value="medium">Trung bình</option>
                                 <option value="simple">Đơn giản</option>
                                 <option value="detailed">Chi tiết</option>
+                                <option value="comprehensive">Toàn diện</option>
                             </select>
                         </div>
                     </div>
-                    
-                    <button class="btn btn-primary" id="generateBtn">
-                        <i class="fas fa-robot"></i> Tạo Sơ Đồ (Còn <span id="generateRemaining">3</span> lượt)
-                    </button>
-                    
-                    <div class="progress-container" id="progressContainer">
-                        <div class="progress-bar">
-                            <div class="progress" id="progress"></div>
-                        </div>
-                        <div class="progress-text" id="progressText">AI Bot đang phân tích...</div>
-                    </div>
-                    
-                    <div class="status-message" id="statusMessage"></div>
                 </div>
                 
-                <!-- Saved Mindmaps Panel -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-history"></i> Sơ đồ đã lưu
+                <button class="generate-btn" id="generateBtn">
+                    <i class="fas fa-robot"></i> TẠO SƠ ĐỒ TƯ DUY
+                </button>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress" id="progress"></div>
                     </div>
-                    <div id="savedMapsList">
-                        <p style="text-align: center; color: #666; padding: 20px;">Chưa có sơ đồ nào được lưu</p>
-                    </div>
+                    <div class="progress-text" id="progressText">AI Bot đang phân tích...</div>
                 </div>
+                
+                <div id="statusMessage" class="status-message"></div>
             </div>
             
-            <!-- MAIN CONTENT -->
-            <div class="mindmap-container">
-                <div class="toolbar">
-                    <button class="btn btn-success" id="downloadBtn" disabled>
-                        <i class="fas fa-download"></i> Tải Ảnh
-                    </button>
-                    <button class="btn btn-warning" id="editToggleBtn" disabled>
-                        <i class="fas fa-edit"></i> Chỉnh Sửa
-                    </button>
-                    <button class="btn btn-primary" id="saveBtn" disabled>
-                        <i class="fas fa-save"></i> Lưu Thay Đổi
-                    </button>
-                    <button class="btn" id="resetBtn" disabled>
-                        <i class="fas fa-redo"></i> Làm Mới
-                    </button>
-                </div>
-                
-                <div class="mindmap" id="mindmap">
+            <div class="result-panel">
+                <div class="mindmap-container" id="mindmapContainer">
                     <div class="empty-state">
                         <i class="fas fa-project-diagram"></i>
-                        <h3>Chưa có sơ đồ</h3>
-                        <p>Nhập nội dung và tạo sơ đồ tư duy đầu tiên của bạn!</p>
+                        <h3>Chờ AI Bot phân tích</h3>
+                        <p>Nhập nội dung và nhấn "TẠO SƠ ĐỒ TƯ DUY" để xem kết quả</p>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Payment Modal -->
-    <div class="modal" id="paymentModal">
-        <div class="modal-content">
-            <h2 style="margin-bottom: 20px; text-align: center;">
-                <i class="fas fa-mobile-alt"></i> Thanh toán với MoMo
-            </h2>
-            
-            <div id="paymentStep1">
-                <p>Bạn đang mua: <strong>Gói 20K - 22 lượt</strong></p>
-                <p>Số tiền: <strong>20.000 VND</strong></p>
                 
-                <div style="background: #e8f4fd; padding: 15px; border-radius: 10px; margin: 15px 0;">
-                    <h4><i class="fas fa-info-circle"></i> Hướng dẫn:</h4>
-                    <ol style="margin-left: 20px; margin-top: 10px;">
-                        <li>Nhấn "Thanh toán ngay" để mở MoMo</li>
-                        <li>Xác nhận thanh toán trong app MoMo</li>
-                        <li>Lượt sẽ được <strong>tự động cộng ngay</strong></li>
-                    </ol>
-                </div>
-                
-                <button class="btn btn-success" id="confirmPaymentBtn" style="width: 100%;">
-                    <i class="fas fa-bolt"></i> Thanh toán ngay
-                </button>
-                
-                <button class="btn" id="cancelPaymentBtn" style="width: 100%; margin-top: 10px; background: #95a5a6;">
-                    <i class="fas fa-times"></i> Hủy
-                </button>
-            </div>
-            
-            <div id="paymentStep2" style="display: none; text-align: center;">
-                <div style="font-size: 4rem; color: #00cec9; margin: 20px 0;">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <h3>Đang xử lý thanh toán...</h3>
-                <p>Vui lòng hoàn tất thanh toán trong ứng dụng MoMo</p>
-                <p id="paymentTimer">Tự động kiểm tra sau: <strong>10</strong> giây</p>
-                
-                <div id="paymentSuccess" style="display: none;">
-                    <div style="font-size: 4rem; color: #00b894; margin: 20px 0;">
-                        <i class="fas fa-check-circle"></i>
+                <div class="ai-analysis" id="aiAnalysis" style="display: none;">
+                    <div class="config-title">
+                        <i class="fas fa-chart-bar"></i> Phân tích của AI Bot
                     </div>
-                    <h3>Thanh toán thành công!</h3>
-                    <p>22 lượt đã được cộng vào tài khoản của bạn</p>
-                    <button class="btn btn-success" onclick="closePaymentModal()" style="width: 100%;">
-                        <i class="fas fa-check"></i> Hoàn tất
+                    <div id="analysisContent"></div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn" id="exportImageBtn" disabled>
+                        <i class="fas fa-download"></i> Xuất Ảnh
+                    </button>
+                    <button class="action-btn primary" id="newMapBtn">
+                        <i class="fas fa-plus"></i> Tạo Mới
                     </button>
                 </div>
             </div>
         </div>
+        
+        <footer>
+            <p>© 2024 AI Mind Map Free | 🤖 Powered by Advanced AI Algorithms | Hoàn toàn miễn phí - Không giới hạn tính năng</p>
+        </footer>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
-        // STATE MANAGEMENT
-        let currentClient = null;
-        let currentMindmap = null;
-        let isEditing = false;
-        let originalMindmapData = null;
-        let paymentCheckInterval = null;
-
-        // DOM ELEMENTS
-        const clientBadge = document.getElementById('clientBadge');
-        const clientIdDisplay = document.getElementById('clientIdDisplay');
-        const displayClientId = document.getElementById('displayClientId');
-        const usageCount = document.getElementById('usageCount');
-        const remainingGenerations = document.getElementById('remainingGenerations');
-        const totalGenerations = document.getElementById('totalGenerations');
-        const usageProgress = document.getElementById('usageProgress');
-        const generateRemaining = document.getElementById('generateRemaining');
-        
-        const generateBtn = document.getElementById('generateBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const editToggleBtn = document.getElementById('editToggleBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const refreshClientBtn = document.getElementById('refreshClientBtn');
-        const buyPackageBtn = document.querySelector('.buy-package-btn');
-        
-        const progressContainer = document.getElementById('progressContainer');
-        const progress = document.getElementById('progress');
-        const progressText = document.getElementById('progressText');
-        const statusMessage = document.getElementById('statusMessage');
-        const paymentStatus = document.getElementById('paymentStatus');
-        
-        const paymentModal = document.getElementById('paymentModal');
-        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
-        const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
-        const paymentStep1 = document.getElementById('paymentStep1');
-        const paymentStep2 = document.getElementById('paymentStep2');
-        const paymentSuccess = document.getElementById('paymentSuccess');
-        const paymentTimer = document.getElementById('paymentTimer');
-
-        // CLIENT ID MANAGEMENT
-        function getClientId() {
-            let clientId = localStorage.getItem('mindmap_client_id');
-            if (!clientId) {
-                // Tạo client ID ngẫu nhiên
-                clientId = 'client_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-                localStorage.setItem('mindmap_client_id', clientId);
+        // Quản lý số lần sử dụng
+        class UsageManager {
+            constructor() {
+                this.dailyLimit = 10;
+                this.storageKey = 'mindmap_usage';
             }
-            return clientId;
+
+            getTodayUsage() {
+                const today = new Date().toDateString();
+                const usageData = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+                
+                if (usageData.date !== today) {
+                    // Reset về 0 nếu là ngày mới
+                    return 0;
+                }
+                
+                return usageData.count || 0;
+            }
+
+            incrementUsage() {
+                const today = new Date().toDateString();
+                const usageData = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+                
+                if (usageData.date !== today) {
+                    usageData.date = today;
+                    usageData.count = 0;
+                }
+                
+                usageData.count = (usageData.count || 0) + 1;
+                localStorage.setItem(this.storageKey, JSON.stringify(usageData));
+                
+                return usageData.count;
+            }
+
+            getRemainingUsage() {
+                const used = this.getTodayUsage();
+                return Math.max(0, this.dailyLimit - used);
+            }
+
+            canUse() {
+                return this.getRemainingUsage() > 0;
+            }
         }
 
-        async function loadClientInfo() {
-            const clientId = getClientId();
-            try {
-                const response = await fetch('/.netlify/functions/get-client', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Client-ID': clientId
-                    },
-                    body: JSON.stringify({ clientId: clientId })
-                });
+        // Bố cục thông minh cho mind map
+        class MindMapRenderer {
+            constructor(container) {
+                this.container = container;
+            }
 
-                if (response.ok) {
-                    const clientData = await response.json();
-                    currentClient = clientData;
-                    updateClientDisplay(clientData);
-                    loadSavedMindmaps();
-                } else {
-                    throw new Error('Failed to load client info');
-                }
-            } catch (error) {
-                console.error('Error loading client info:', error);
-                // Tạo client mới nếu chưa có
-                currentClient = {
-                    clientId: clientId,
-                    usageCount: 0,
-                    remainingGenerations: 3,
-                    totalGenerations: 3
+            calculateSmartLayout(centralTopic, mainBranches) {
+                const centerX = this.container.offsetWidth / 2;
+                const centerY = this.container.offsetHeight / 2;
+                
+                const layout = {
+                    central: { x: centerX, y: centerY },
+                    branches: []
                 };
-                updateClientDisplay(currentClient);
+
+                const branchCount = mainBranches.length;
+                const baseRadius = Math.min(centerX, centerY) * 0.4;
+                
+                mainBranches.forEach((branch, index) => {
+                    const angle = (2 * Math.PI * index) / branchCount;
+                    const branchX = centerX + Math.cos(angle) * baseRadius;
+                    const branchY = centerY + Math.sin(angle) * baseRadius;
+                    
+                    const branchLayout = {
+                        title: branch.title,
+                        x: branchX,
+                        y: branchY,
+                        subTopics: []
+                    };
+
+                    // Tính toán vị trí subtopics
+                    const subTopicCount = branch.subTopics.length;
+                    const subBaseRadius = baseRadius * 0.6;
+                    
+                    branch.subTopics.forEach((subTopic, subIndex) => {
+                        const subAngle = angle - Math.PI/4 + (subIndex * Math.PI/2) / (subTopicCount + 1);
+                        const subX = branchX + Math.cos(subAngle) * subBaseRadius;
+                        const subY = branchY + Math.sin(subAngle) * subBaseRadius;
+                        
+                        branchLayout.subTopics.push({
+                            text: subTopic,
+                            x: subX,
+                            y: subY
+                        });
+                    });
+
+                    layout.branches.push(branchLayout);
+                });
+
+                return layout;
+            }
+
+            renderMindMap(mindmapData) {
+                this.container.innerHTML = '';
+                
+                const mindmap = document.createElement('div');
+                mindmap.className = 'mindmap';
+                mindmap.style.position = 'relative';
+                mindmap.style.width = '100%';
+                mindmap.style.height = '500px';
+
+                const layout = this.calculateSmartLayout(
+                    mindmapData.centralTopic, 
+                    mindmapData.mainBranches
+                );
+
+                // Node trung tâm
+                const centralNode = this.createNode(
+                    mindmapData.centralTopic,
+                    layout.central.x,
+                    layout.central.y,
+                    'central'
+                );
+                mindmap.appendChild(centralNode);
+
+                // Các nhánh và subtopics
+                layout.branches.forEach(branch => {
+                    const branchNode = this.createNode(
+                        branch.title,
+                        branch.x,
+                        branch.y,
+                        'main-branch'
+                    );
+                    mindmap.appendChild(branchNode);
+
+                    this.createConnection(
+                        layout.central.x,
+                        layout.central.y,
+                        branch.x,
+                        branch.y,
+                        mindmap
+                    );
+
+                    branch.subTopics.forEach(subTopic => {
+                        const subNode = this.createNode(
+                            subTopic.text,
+                            subTopic.x,
+                            subTopic.y,
+                            'sub-topic'
+                        );
+                        mindmap.appendChild(subNode);
+
+                        this.createConnection(
+                            branch.x,
+                            branch.y,
+                            subTopic.x,
+                            subTopic.y,
+                            mindmap
+                        );
+                    });
+                });
+
+                this.container.appendChild(mindmap);
+                this.addSmoothAnimations();
+            }
+
+            createNode(text, x, y, className) {
+                const node = document.createElement('div');
+                node.className = `node ${className}`;
+                node.textContent = text;
+                node.style.left = `${x}px`;
+                node.style.top = `${y}px`;
+                node.style.position = 'absolute';
+                node.style.transform = 'translate(-50%, -50%)';
+                node.style.zIndex = '2';
+                node.style.maxWidth = '180px';
+                node.style.minWidth = '120px';
+                node.style.wordWrap = 'break-word';
+                node.style.textAlign = 'center';
+                
+                return node;
+            }
+
+            createConnection(x1, y1, x2, y2, parent) {
+                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                
+                const connection = document.createElement('div');
+                connection.className = 'connection';
+                connection.style.width = `${length}px`;
+                connection.style.left = `${x1}px`;
+                connection.style.top = `${y1}px`;
+                connection.style.transform = `rotate(${angle}deg)`;
+                connection.style.position = 'absolute';
+                connection.style.zIndex = '1';
+                connection.setAttribute('data-length', length);
+                
+                parent.appendChild(connection);
+            }
+
+            addSmoothAnimations() {
+                const nodes = document.querySelectorAll('.node');
+                nodes.forEach((node, index) => {
+                    node.style.opacity = '0';
+                    node.style.transform = 'translate(-50%, -50%) scale(0.8)';
+                    
+                    setTimeout(() => {
+                        node.style.transition = 'all 0.5s ease';
+                        node.style.opacity = '1';
+                        node.style.transform = 'translate(-50%, -50%) scale(1)';
+                    }, index * 100);
+                });
+
+                const connections = document.querySelectorAll('.connection');
+                connections.forEach((conn, index) => {
+                    conn.style.width = '0';
+                    setTimeout(() => {
+                        conn.style.transition = 'width 0.8s ease';
+                        conn.style.width = conn.getAttribute('data-length') + 'px';
+                    }, index * 150);
+                });
             }
         }
 
-        function updateClientDisplay(clientData) {
-            clientIdDisplay.textContent = clientData.clientId.substring(0, 12) + '...';
-            displayClientId.textContent = clientData.clientId;
-            usageCount.textContent = clientData.usageCount;
-            remainingGenerations.textContent = clientData.remainingGenerations;
-            totalGenerations.textContent = clientData.totalGenerations;
-            generateRemaining.textContent = clientData.remainingGenerations;
-            
-            const usagePercentage = (clientData.usageCount / clientData.totalGenerations) * 100;
-            usageProgress.style.width = `${usagePercentage}%`;
-            
-            // Update generate button state
-            generateBtn.disabled = clientData.remainingGenerations <= 0;
-            if (clientData.remainingGenerations <= 0) {
-                generateBtn.innerHTML = `<i class="fas fa-robot"></i> Hết lượt - Mua thêm`;
-                generateBtn.style.background = '#e17055';
-            } else {
-                generateBtn.innerHTML = `<i class="fas fa-robot"></i> Tạo Sơ Đồ (Còn ${clientData.remainingGenerations} lượt)`;
-                generateBtn.style.background = '';
-            }
-        }
-
-        // INITIALIZATION
+        // Khởi tạo ứng dụng
         document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-            setupEventListeners();
-        });
-
-        function initializeApp() {
-            loadClientInfo();
-        }
-
-        function setupEventListeners() {
-            generateBtn.addEventListener('click', generateMindmap);
-            downloadBtn.addEventListener('click', downloadAsImage);
-            editToggleBtn.addEventListener('click', toggleEditing);
-            saveBtn.addEventListener('click', saveChanges);
-            resetBtn.addEventListener('click', resetMindmap);
-            refreshClientBtn.addEventListener('click', loadClientInfo);
-            buyPackageBtn.addEventListener('click', openPaymentModal);
-            confirmPaymentBtn.addEventListener('click', processMoMoPayment);
-            cancelPaymentBtn.addEventListener('click', closePaymentModal);
-
-            // Enable generate button when text is entered
-            document.getElementById('textInput').addEventListener('input', function() {
-                generateBtn.disabled = !this.value.trim() || (currentClient && currentClient.remainingGenerations <= 0);
+            // DOM Elements
+            const modeBtns = document.querySelectorAll('.mode-btn');
+            const textInputArea = document.getElementById('text-input-area');
+            const imageInputArea = document.getElementById('image-input-area');
+            const textInput = document.getElementById('textInput');
+            const charCount = document.getElementById('charCount');
+            const fileInput = document.getElementById('fileInput');
+            const imageUploadArea = document.getElementById('imageUploadArea');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const generateBtn = document.getElementById('generateBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progress = document.getElementById('progress');
+            const progressText = document.getElementById('progressText');
+            const statusMessage = document.getElementById('statusMessage');
+            const mindmapContainer = document.getElementById('mindmapContainer');
+            const aiAnalysis = document.getElementById('aiAnalysis');
+            const analysisContent = document.getElementById('analysisContent');
+            const exportImageBtn = document.getElementById('exportImageBtn');
+            const newMapBtn = document.getElementById('newMapBtn');
+            const usageText = document.getElementById('usageText');
+            const usageProgress = document.getElementById('usageProgress');
+            
+            // Variables
+            let currentMode = 'text';
+            let uploadedImages = [];
+            const usageManager = new UsageManager();
+            const mindmapRenderer = new MindMapRenderer(mindmapContainer);
+            
+            // Initialize
+            updateUsageDisplay();
+            
+            // Event Listeners
+            modeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const mode = this.getAttribute('data-mode');
+                    modeBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    textInputArea.classList.remove('active');
+                    imageInputArea.classList.remove('active');
+                    
+                    if (mode === 'text') {
+                        textInputArea.classList.add('active');
+                        currentMode = 'text';
+                    } else {
+                        imageInputArea.classList.add('active');
+                        currentMode = 'image';
+                    }
+                });
             });
-        }
-
-        // MINDMAP FUNCTIONS
-        async function generateMindmap() {
-            if (!currentClient || currentClient.remainingGenerations <= 0) {
-                showStatus('Bạn đã hết lượt sử dụng. Vui lòng mua thêm gói!', 'error');
-                return;
-            }
-
-            const text = document.getElementById('textInput').value.trim();
-            const style = document.getElementById('styleSelect').value;
-            const complexity = document.getElementById('complexitySelect').value;
-
-            if (!text) {
-                showStatus('Vui lòng nhập nội dung', 'error');
-                return;
-            }
-
-            // Show progress
-            progressContainer.style.display = 'block';
-            progress.style.width = '10%';
-            progressText.textContent = '🤖 AI Bot đang phân tích...';
-            generateBtn.disabled = true;
-
-            try {
-                const steps = [
-                    'Đang phân tích cấu trúc văn bản...',
-                    'Đang trích xuất từ khóa quan trọng...',
-                    'Đang tạo cấu trúc sơ đồ tư duy...',
-                    'Đang tối ưu hóa bố cục...',
-                    'Hoàn thành!'
-                ];
-
-                for (let i = 0; i < steps.length; i++) {
-                    progress.style.width = `${10 + (i * 22)}%`;
-                    progressText.textContent = steps[i];
-                    await new Promise(resolve => setTimeout(resolve, 600));
-                }
-
-                const response = await fetch('/.netlify/functions/ai-mindmap-bot', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Client-ID': currentClient.clientId
-                    },
-                    body: JSON.stringify({
-                        text: text,
-                        style: style,
-                        complexity: complexity,
-                        saveToAccount: true
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'AI Bot error');
-                }
-
-                const data = await response.json();
-                currentMindmap = data;
-                originalMindmapData = JSON.parse(JSON.stringify(data));
-
-                renderMindMap(data);
-                enableToolbar();
+            
+            textInput.addEventListener('input', function() {
+                const count = this.value.length;
+                charCount.textContent = count;
+                charCount.style.color = count > 1500 ? '#e74c3c' : '#666';
+            });
+            
+            imageUploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', function() {
+                if (!this.files.length) return;
                 
-                // Update client info
-                currentClient.usageCount = data.usage.used;
-                currentClient.remainingGenerations = data.usage.remaining;
-                currentClient.totalGenerations = data.usage.total;
-                updateClientDisplay(currentClient);
-
-                progress.style.width = '100%';
-                progressText.textContent = '✅ Tạo sơ đồ thành công!';
-                showStatus(`Đã tạo sơ đồ! Còn ${data.usage.remaining} lượt sử dụng.`, 'success');
-
-            } catch (error) {
-                console.error('Generation error:', error);
-                showStatus('Lỗi: ' + error.message, 'error');
-            } finally {
-                setTimeout(() => {
-                    progressContainer.style.display = 'none';
-                    generateBtn.disabled = currentClient.remainingGenerations <= 0;
-                }, 2000);
-            }
-        }
-
-        // PAYMENT FUNCTIONS
-        function openPaymentModal() {
-            paymentModal.style.display = 'flex';
-            paymentStep1.style.display = 'block';
-            paymentStep2.style.display = 'none';
-            paymentSuccess.style.display = 'none';
-        }
-
-        function closePaymentModal() {
-            paymentModal.style.display = 'none';
-            stopPaymentStatusCheck();
-        }
-
-        async function processMoMoPayment() {
-            if (!currentClient) {
-                showStatus('Lỗi: Không tìm thấy thông tin client', 'error');
-                return;
-            }
-
-            confirmPaymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-            confirmPaymentBtn.disabled = true;
-
-            try {
-                const response = await fetch('/.netlify/functions/momo-payment', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Client-ID': currentClient.clientId
-                    },
-                    body: JSON.stringify({
-                        packageType: 'basic',
-                        clientId: currentClient.clientId
-                    })
-                });
-
-                const result = await response.json();
+                const files = Array.from(this.files);
                 
-                if (response.ok && result.success) {
-                    // Chuyển sang bước 2
-                    paymentStep1.style.display = 'none';
-                    paymentStep2.style.display = 'block';
+                if (uploadedImages.length + files.length > 3) {
+                    showStatus('Bạn chỉ có thể tải lên tối đa 3 ảnh!', 'error');
+                    return;
+                }
+                
+                files.forEach(file => {
+                    if (!file.type.match('image.*')) {
+                        showStatus('Vui lòng chọn file ảnh (JPEG, PNG, GIF)!', 'error');
+                        return;
+                    }
                     
-                    // Mở MoMo trong cửa sổ mới
-                    window.open(result.paymentUrl, 'momoPayment', 'width=400,height=600');
+                    if (file.size > 5 * 1024 * 1024) {
+                        showStatus(`Ảnh "${file.name}" quá lớn. Vui lòng chọn ảnh nhỏ hơn 5MB.`, 'error');
+                        return;
+                    }
                     
-                    // Bắt đầu kiểm tra trạng thái thanh toán
-                    startPaymentStatusCheck();
+                    const reader = new FileReader();
                     
+                    reader.onload = function(e) {
+                        uploadedImages.push({
+                            name: file.name,
+                            data: e.target.result
+                        });
+                        
+                        displayImagePreview();
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+                
+                this.value = '';
+            });
+            
+            generateBtn.addEventListener('click', generateMindMap);
+            exportImageBtn.addEventListener('click', exportAsImage);
+            newMapBtn.addEventListener('click', resetApp);
+            
+            // Functions
+            function displayImagePreview() {
+                imagePreviewContainer.innerHTML = '';
+                
+                uploadedImages.forEach((image, index) => {
+                    const preview = document.createElement('div');
+                    preview.className = 'image-preview';
+                    
+                    preview.innerHTML = `
+                        <img src="${image.data}" alt="${image.name}">
+                        <button class="remove-image" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    imagePreviewContainer.appendChild(preview);
+                });
+                
+                document.querySelectorAll('.remove-image').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        uploadedImages.splice(index, 1);
+                        displayImagePreview();
+                    });
+                });
+            }
+            
+            async function generateMindMap() {
+                // Kiểm tra số lần sử dụng
+                if (!usageManager.canUse()) {
+                    showStatus('Bạn đã sử dụng hết 10 lần miễn phí hôm nay. Vui lòng quay lại vào ngày mai!', 'error');
+                    return;
+                }
+                
+                let content = '';
+                
+                if (currentMode === 'text') {
+                    content = textInput.value.trim();
+                    if (!content) {
+                        showStatus('Vui lòng nhập nội dung văn bản', 'error');
+                        return;
+                    }
+                    if (content.length > 1500) {
+                        showStatus('Văn bản vượt quá 1500 chữ, sẽ tự động cắt bớt', 'warning');
+                        content = content.substring(0, 1500);
+                    }
                 } else {
-                    throw new Error(result.error || 'Không thể tạo yêu cầu thanh toán');
-                }
-            } catch (error) {
-                showStatus('Lỗi: ' + error.message, 'error');
-            } finally {
-                confirmPaymentBtn.innerHTML = '<i class="fas fa-bolt"></i> Thanh toán ngay';
-                confirmPaymentBtn.disabled = false;
-            }
-        }
-
-        function startPaymentStatusCheck() {
-            let seconds = 10;
-            paymentCheckInterval = setInterval(async () => {
-                seconds--;
-                paymentTimer.innerHTML = `Tự động kiểm tra sau: <strong>${seconds}</strong> giây`;
-                
-                if (seconds <= 0) {
-                    await checkPaymentStatus();
-                    seconds = 10;
-                }
-            }, 1000);
-        }
-
-        function stopPaymentStatusCheck() {
-            if (paymentCheckInterval) {
-                clearInterval(paymentCheckInterval);
-                paymentCheckInterval = null;
-            }
-        }
-
-        async function checkPaymentStatus() {
-            if (!currentClient) return;
-
-            try {
-                // Load lại thông tin client để kiểm tra lượt mới
-                const response = await fetch('/.netlify/functions/get-client', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Client-ID': currentClient.clientId
-                    },
-                    body: JSON.stringify({ clientId: currentClient.clientId })
-                });
-
-                if (response.ok) {
-                    const clientData = await response.json();
+                    if (uploadedImages.length === 0) {
+                        showStatus('Vui lòng tải lên ít nhất một hình ảnh', 'error');
+                        return;
+                    }
                     
-                    // Nếu lượt tăng lên -> thanh toán thành công
-                    if (clientData.remainingGenerations > currentClient.remainingGenerations) {
-                        currentClient = clientData;
-                        updateClientDisplay(clientData);
-                        
-                        // Hiển thị thành công
-                        paymentStep2.style.display = 'none';
-                        paymentSuccess.style.display = 'block';
-                        stopPaymentStatusCheck();
-                        
-                        showStatus(`🎉 Mua gói thành công! Bạn đã có thêm ${clientData.remainingGenerations - currentClient.remainingGenerations} lượt!`, 'success');
+                    // Trích xuất văn bản từ ảnh
+                    content = await extractTextFromImages();
+                    if (!content) {
+                        showStatus('Không thể trích xuất văn bản từ hình ảnh', 'error');
+                        return;
                     }
                 }
-            } catch (error) {
-                console.error('Error checking payment status:', error);
-            }
-        }
-
-        // RENDER MINDMAP (giữ nguyên từ trước)
-        function renderMindMap(data) {
-            const mindmap = document.getElementById('mindmap');
-            mindmap.innerHTML = '';
-            mindmap.style.position = 'relative';
-            mindmap.style.width = '100%';
-            mindmap.style.height = '600px';
-            mindmap.style.background = '#f8f9fa';
-
-            if (!data || !data.centralTopic) {
-                mindmap.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Lỗi tạo sơ đồ</h3></div>';
-                return;
-            }
-
-            const centerX = mindmap.offsetWidth / 2;
-            const centerY = mindmap.offsetHeight / 2;
-
-            // Create central node
-            const centralNode = createNode(data.centralTopic, centerX, centerY, 'central');
-            mindmap.appendChild(centralNode);
-
-            // Create main branches with smart layout
-            const branchCount = data.mainBranches.length;
-            const baseRadius = Math.min(centerX, centerY) * 0.4;
-
-            data.mainBranches.forEach((branch, index) => {
-                const angle = (2 * Math.PI * index) / branchCount;
-                const branchX = centerX + Math.cos(angle) * baseRadius;
-                const branchY = centerY + Math.sin(angle) * baseRadius;
-
-                // Main branch node
-                const branchNode = createNode(branch.title, branchX, branchY, 'main-branch');
-                mindmap.appendChild(branchNode);
-
-                // Connection from center to branch
-                createConnection(centerX, centerY, branchX, branchY, mindmap);
-
-                // Create sub-topics
-                const subTopicCount = branch.subTopics.length;
-                const subBaseRadius = baseRadius * 0.6;
-
-                branch.subTopics.forEach((subTopic, subIndex) => {
-                    const subAngle = angle - Math.PI/4 + (subIndex * Math.PI/2) / (subTopicCount + 1);
-                    const subX = branchX + Math.cos(subAngle) * subBaseRadius;
-                    const subY = branchY + Math.sin(subAngle) * subBaseRadius;
-
-                    const subNode = createNode(subTopic, subX, subY, 'sub-topic');
-                    mindmap.appendChild(subNode);
-
-                    createConnection(branchX, branchY, subX, subY, mindmap);
-                });
-            });
-
-            // Add smooth animations
-            addSmoothAnimations();
-        }
-
-        function createNode(text, x, y, className) {
-            const node = document.createElement('div');
-            node.className = `node ${className}`;
-            node.textContent = text;
-            node.style.left = `${x}px`;
-            node.style.top = `${y}px`;
-            node.style.transform = 'translate(-50%, -50%)';
-            node.style.position = 'absolute';
-            node.style.zIndex = '2';
-            
-            if (isEditing) {
-                node.setAttribute('contenteditable', 'true');
-                node.addEventListener('input', function() {
-                    this.classList.add('editing');
-                });
-            }
-
-            return node;
-        }
-
-        function createConnection(x1, y1, x2, y2, parent) {
-            const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-            
-            const connection = document.createElement('div');
-            connection.className = 'connection';
-            connection.style.width = `${length}px`;
-            connection.style.left = `${x1}px`;
-            connection.style.top = `${y1}px`;
-            connection.style.transform = `rotate(${angle}deg)`;
-            connection.style.position = 'absolute';
-            connection.style.zIndex = '1';
-            connection.setAttribute('data-length', length);
-            
-            parent.appendChild(connection);
-        }
-
-        function addSmoothAnimations() {
-            const nodes = document.querySelectorAll('.node');
-            nodes.forEach((node, index) => {
-                node.style.opacity = '0';
-                node.style.transform = 'translate(-50%, -50%) scale(0.8)';
                 
-                setTimeout(() => {
-                    node.style.transition = 'all 0.5s ease';
-                    node.style.opacity = '1';
-                    node.style.transform = 'translate(-50%, -50%) scale(1)';
-                }, index * 100);
-            });
-
-            const connections = document.querySelectorAll('.connection');
-            connections.forEach((conn, index) => {
-                conn.style.width = '0';
-                setTimeout(() => {
-                    conn.style.transition = 'width 0.8s ease';
-                    conn.style.width = conn.getAttribute('data-length') + 'px';
-                }, index * 150);
-            });
-        }
-
-        // EDITING FUNCTIONS (giữ nguyên từ trước)
-        function toggleEditing() {
-            isEditing = !isEditing;
-            const nodes = document.querySelectorAll('.node');
-            
-            if (isEditing) {
-                editToggleBtn.innerHTML = '<i class="fas fa-times"></i> Thoát Chỉnh Sửa';
-                editToggleBtn.classList.remove('btn-warning');
-                editToggleBtn.classList.add('btn-danger');
-                saveBtn.disabled = false;
+                // Hiển thị tiến trình
+                progressContainer.style.display = 'block';
+                progress.style.width = '10%';
+                progressText.textContent = 'Đang xử lý...';
+                generateBtn.disabled = true;
                 
-                nodes.forEach(node => {
-                    node.setAttribute('contenteditable', 'true');
-                    node.style.cursor = 'text';
-                });
-                
-                showStatus('Chế độ chỉnh sửa: Click vào các khung để thay đổi nội dung', 'success');
-            } else {
-                editToggleBtn.innerHTML = '<i class="fas fa-edit"></i> Chỉnh Sửa';
-                editToggleBtn.classList.remove('btn-danger');
-                editToggleBtn.classList.add('btn-warning');
-                saveBtn.disabled = true;
-                
-                nodes.forEach(node => {
-                    node.setAttribute('contenteditable', 'false');
-                    node.style.cursor = 'pointer';
-                    node.classList.remove('editing');
-                });
-                
-                showStatus('Đã thoát chế độ chỉnh sửa', 'success');
-            }
-        }
-
-        async function saveChanges() {
-            if (!currentMindmap) return;
-
-            // Collect updated content
-            const nodes = document.querySelectorAll('.node');
-            const centralNode = Array.from(nodes).find(node => node.classList.contains('central'));
-            const mainBranchNodes = Array.from(nodes).filter(node => node.classList.contains('main-branch'));
-            const subTopicNodes = Array.from(nodes).filter(node => node.classList.contains('sub-topic'));
-
-            // Update mindmap data structure
-            currentMindmap.centralTopic = centralNode?.textContent || currentMindmap.centralTopic;
-            
-            mainBranchNodes.forEach((branchNode, branchIndex) => {
-                if (currentMindmap.mainBranches[branchIndex]) {
-                    currentMindmap.mainBranches[branchIndex].title = branchNode.textContent;
+                try {
+                    // Mô phỏng các bước xử lý
+                    const steps = [
+                        'Đang phân tích cấu trúc văn bản...',
+                        'Đang trích xuất từ khóa quan trọng...',
+                        'Đang đánh giá mức độ quan trọng câu...',
+                        'Đang nhóm ý theo chủ đề...',
+                        'Đang tạo cấu trúc sơ đồ tư duy...',
+                        'Hoàn thành!'
+                    ];
                     
-                    // Find sub-topics for this branch
-                    const branchSubTopics = subTopicNodes.filter((_, index) => 
-                        Math.floor(index / 3) === branchIndex
-                    );
+                    for (let i = 0; i < steps.length; i++) {
+                        progress.style.width = `${10 + (i * 15)}%`;
+                        progressText.textContent = steps[i];
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
                     
-                    branchSubTopics.forEach((subNode, subIndex) => {
-                        if (currentMindmap.mainBranches[branchIndex].subTopics[subIndex]) {
-                            currentMindmap.mainBranches[branchIndex].subTopics[subIndex] = subNode.textContent;
-                        }
+                    // Gọi AI Bot
+                    const response = await fetch('/.netlify/functions/ai-mindmap-bot', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: content,
+                            style: document.getElementById('styleSelect').value,
+                            complexity: document.getElementById('complexitySelect').value
+                        })
                     });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Lỗi AI Bot: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Cập nhật số lần sử dụng
+                    usageManager.incrementUsage();
+                    updateUsageDisplay();
+                    
+                    // Hiển thị kết quả
+                    mindmapRenderer.renderMindMap(data);
+                    showAIAnalysis(data);
+                    
+                    progress.style.width = '100%';
+                    progressText.textContent = '✅ Phân tích hoàn thành!';
+                    
+                    // Kích hoạt nút export
+                    exportImageBtn.disabled = false;
+                    
+                    showStatus('AI Bot đã tạo sơ đồ tư duy thành công!', 'success');
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    showStatus('Lỗi: ' + error.message, 'error');
+                } finally {
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        generateBtn.disabled = false;
+                    }, 1000);
                 }
-            });
-
-            showStatus('Đã lưu thay đổi!', 'success');
-            toggleEditing();
-        }
-
-        function resetMindmap() {
-            if (originalMindmapData) {
-                currentMindmap = JSON.parse(JSON.stringify(originalMindmapData));
-                renderMindMap(currentMindmap);
-                showStatus('Đã khôi phục sơ đồ gốc', 'success');
             }
-        }
-
-        // DOWNLOAD FUNCTION (giữ nguyên)
-        async function downloadAsImage() {
-            const mindmap = document.getElementById('mindmap');
             
-            try {
-                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-                downloadBtn.disabled = true;
-
-                const canvas = await html2canvas(mindmap, {
-                    backgroundColor: '#f8f9fa',
-                    scale: 2,
-                    useCORS: true
-                });
-
-                const link = document.createElement('a');
-                link.download = `mindmap-${currentClient.clientId}-${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-
-                showStatus('Đã tải ảnh thành công!', 'success');
-            } catch (error) {
-                showStatus('Lỗi tải ảnh: ' + error.message, 'error');
-            } finally {
-                downloadBtn.innerHTML = '<i class="fas fa-download"></i> Tải Ảnh';
-                downloadBtn.disabled = false;
-            }
-        }
-
-        // SAVED MINDMAPS (giữ nguyên)
-        async function loadSavedMindmaps() {
-            if (!currentClient) return;
-
-            try {
-                const response = await fetch('/.netlify/functions/get-client-mindmaps', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Client-ID': currentClient.clientId
-                    },
-                    body: JSON.stringify({ clientId: currentClient.clientId })
-                });
-
-                if (response.ok) {
-                    const mindmaps = await response.json();
-                    displaySavedMindmaps(mindmaps);
+            async function extractTextFromImages() {
+                let allText = '';
+                const imageCount = uploadedImages.length;
+                
+                for (let i = 0; i < imageCount; i++) {
+                    try {
+                        progressText.textContent = `Đang trích xuất văn bản từ ảnh ${i+1}/${imageCount}...`;
+                        
+                        const result = await Tesseract.recognize(
+                            uploadedImages[i].data,
+                            'vie+eng'
+                        );
+                        
+                        allText += result.data.text + '\n\n';
+                    } catch (error) {
+                        console.error(`Lỗi trích xuất ảnh ${i+1}:`, error);
+                    }
                 }
-            } catch (error) {
-                console.error('Error loading saved mindmaps:', error);
+                
+                return allText.trim();
             }
-        }
-
-        function displaySavedMindmaps(mindmaps) {
-            const savedMapsList = document.getElementById('savedMapsList');
             
-            if (!mindmaps || mindmaps.length === 0) {
-                savedMapsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Chưa có sơ đồ nào được lưu</p>';
-                return;
-            }
-
-            savedMapsList.innerHTML = mindmaps.map(mindmap => `
-                <div class="saved-map-item" style="background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid var(--ai-color); cursor: pointer;" onclick="loadSavedMindmap('${mindmap.id}')">
-                    <strong>${mindmap.data.centralTopic.substring(0, 50)}${mindmap.data.centralTopic.length > 50 ? '...' : ''}</strong>
-                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-                        ${new Date(mindmap.createdAt).toLocaleDateString('vi-VN')}
+            function showAIAnalysis(data) {
+                aiAnalysis.style.display = 'block';
+                
+                const analysis = data.analysis;
+                const confidence = Math.round(analysis.confidence * 100);
+                
+                analysisContent.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                            <strong>Số câu phân tích:</strong> ${analysis.totalSentences}
+                        </div>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                            <strong>Tổng số từ:</strong> ${analysis.totalWords}
+                        </div>
                     </div>
-                </div>
-            `).join('');
-        }
-
-        async function loadSavedMindmap(mindmapId) {
-            try {
-                const response = await fetch('/.netlify/functions/get-mindmap', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mindmapId: mindmapId })
-                });
-
-                if (response.ok) {
-                    const mindmap = await response.json();
-                    currentMindmap = mindmap.data;
-                    originalMindmapData = JSON.parse(JSON.stringify(mindmap.data));
-                    renderMindMap(mindmap.data);
-                    enableToolbar();
-                    showStatus('Đã tải sơ đồ đã lưu', 'success');
-                }
-            } catch (error) {
-                showStatus('Lỗi tải sơ đồ: ' + error.message, 'error');
+                    <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                        <strong>Độ tin cậy AI:</strong> 
+                        <div style="background: #e9ecef; border-radius: 10px; margin-top: 5px; overflow: hidden;">
+                            <div style="background: #00cec9; height: 10px; width: ${confidence}%; border-radius: 10px;"></div>
+                        </div>
+                        <small>${confidence}% - Dựa trên độ phức tạp văn bản</small>
+                    </div>
+                    <div>
+                        <strong>Từ khóa chính:</strong> 
+                        ${analysis.keywords.map(keyword => 
+                            `<span style="background: #00cec9; color: white; padding: 3px 8px; border-radius: 12px; margin: 2px; display: inline-block; font-size: 0.8rem;">${keyword}</span>`
+                        ).join('')}
+                    </div>
+                `;
             }
-        }
-
-        // UTILITY FUNCTIONS
-        function enableToolbar() {
-            downloadBtn.disabled = false;
-            editToggleBtn.disabled = false;
-            resetBtn.disabled = false;
-        }
-
-        function disableToolbar() {
-            downloadBtn.disabled = true;
-            editToggleBtn.disabled = true;
-            saveBtn.disabled = true;
-            resetBtn.disabled = true;
-        }
-
-        function showStatus(message, type) {
-            statusMessage.textContent = message;
-            statusMessage.className = 'status-message';
-            statusMessage.classList.add(`status-${type}`);
-            statusMessage.style.display = 'block';
             
-            setTimeout(() => {
-                statusMessage.style.display = 'none';
-            }, 5000);
-        }
-
-        // Make functions available globally
-        window.loadSavedMindmap = loadSavedMindmap;
-        window.closePaymentModal = closePaymentModal;
+            function exportAsImage() {
+                html2canvas(mindmapContainer).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'so-do-tu-duy-ai.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            }
+            
+            function resetApp() {
+                mindmapContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-project-diagram"></i>
+                        <h3>Chờ AI Bot phân tích</h3>
+                        <p>Nhập nội dung và nhấn "TẠO SƠ ĐỒ TƯ DUY" để xem kết quả</p>
+                    </div>
+                `;
+                aiAnalysis.style.display = 'none';
+                exportImageBtn.disabled = true;
+                textInput.value = '';
+                charCount.textContent = '0';
+                uploadedImages = [];
+                displayImagePreview();
+                showStatus('Sẵn sàng tạo sơ đồ tư duy mới!', 'success');
+            }
+            
+            function updateUsageDisplay() {
+                const used = usageManager.getTodayUsage();
+                const remaining = usageManager.getRemainingUsage();
+                const percentage = (used / 10) * 100;
+                
+                usageText.textContent = `Đã dùng ${used}/10 lần - Còn ${remaining} lần`;
+                usageProgress.style.width = percentage + '%';
+                
+                if (used >= 10) {
+                    usageProgress.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
+                } else if (used >= 7) {
+                    usageProgress.style.background = 'linear-gradient(90deg, #f39c12, #e67e22)';
+                } else {
+                    usageProgress.style.background = 'linear-gradient(90deg, #00cec9, #00b894)';
+                }
+            }
+            
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status-message';
+                statusMessage.classList.add(`status-${type}`);
+                statusMessage.style.display = 'block';
+                
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }
+        });
     </script>
 </body>
 </html>
