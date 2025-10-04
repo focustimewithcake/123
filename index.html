@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🤖 AI Mind Map - Hoàn Toàn Miễn Phí</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
@@ -31,6 +31,7 @@
             line-height: 1.6;
             padding: 20px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
         
         .container {
@@ -78,6 +79,16 @@
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 20px;
+            }
+            
+            header {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
             }
         }
         
@@ -289,19 +300,21 @@
             display: flex;
             flex-direction: column;
         }
-        
-        /* Container với scroll và zoom */
+
+        /* FIX: Container với scroll và zoom - CẢI THIỆN CHO MOBILE */
         .mindmap-container {
             flex: 1;
             background: white;
             border-radius: 12px;
             padding: 0;
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            min-height: 500px;
+            min-height: 400px;
             position: relative;
             overflow: auto;
             cursor: grab;
             border: 2px solid #e9ecef;
+            width: 100%;
+            -webkit-overflow-scrolling: touch; /* Quan trọng cho iOS */
         }
 
         .mindmap-container:active {
@@ -311,6 +324,9 @@
         .mindmap-canvas {
             transition: transform 0.1s ease;
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            min-width: 800px;
+            min-height: 600px;
+            position: relative;
         }
 
         /* Controls cho zoom */
@@ -374,28 +390,29 @@
             background: var(--primary-color);
         }
 
-        /* Node được cải thiện */
+        /* FIX: Node được cải thiện cho mobile */
         .node {
             position: absolute;
-            padding: 14px 20px;
+            padding: 12px 16px;
             background: white;
             border: 2px solid var(--ai-color);
-            border-radius: 10px;
+            border-radius: 8px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            max-width: 200px;
-            min-width: 140px;
+            max-width: 180px;
+            min-width: 120px;
             word-wrap: break-word;
             z-index: 2;
             cursor: pointer;
-            font-size: 0.95rem;
-            line-height: 1.4;
+            font-size: 0.9rem;
+            line-height: 1.3;
+            transform: translate(-50%, -50%);
         }
 
         .node:hover {
-            transform: translate(-50%, -50%) scale(1.08);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
             z-index: 100;
         }
 
@@ -403,11 +420,11 @@
             background: linear-gradient(135deg, var(--ai-color), var(--success-color));
             color: white;
             font-weight: 700;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             border: none;
-            box-shadow: 0 8px 30px rgba(0, 206, 201, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 206, 201, 0.4);
             z-index: 50;
-            padding: 20px 25px;
+            padding: 18px 22px;
         }
 
         .node.main-branch {
@@ -415,16 +432,53 @@
             color: white;
             border: none;
             font-weight: 600;
-            font-size: 1.15rem;
-            padding: 16px 22px;
+            font-size: 1.05rem;
+            padding: 14px 18px;
         }
 
         .node.sub-topic {
             background: white;
             color: #2d3436;
             border-color: var(--secondary-color);
-            font-size: 0.9rem;
-            padding: 12px 18px;
+            font-size: 0.85rem;
+            padding: 10px 14px;
+        }
+
+        /* Mobile-specific node styles */
+        @media (max-width: 768px) {
+            .node {
+                max-width: 150px;
+                min-width: 100px;
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .node.central {
+                font-size: 1.1rem;
+                padding: 15px 20px;
+                max-width: 200px;
+            }
+            
+            .node.main-branch {
+                font-size: 1rem;
+                padding: 12px 16px;
+                max-width: 170px;
+            }
+            
+            .node.sub-topic {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+                max-width: 140px;
+            }
+            
+            .mindmap-container {
+                min-height: 350px;
+            }
+            
+            .mindmap-canvas {
+                min-width: 600px;
+                min-height: 500px;
+            }
         }
 
         .connection {
@@ -744,6 +798,11 @@
             constructor(container) {
                 this.container = container;
                 this.zoomLevel = 1;
+                this.isDragging = false;
+                this.startX = 0;
+                this.startY = 0;
+                this.scrollLeft = 0;
+                this.scrollTop = 0;
             }
 
             // THUẬT TOÁN BỐ CỤC MỚI - PHÂN TÁN THÔNG MINH
@@ -897,6 +956,10 @@
                 
                 // Hiệu ứng mượt mà
                 this.addSmoothAnimations();
+                
+                // Điều chỉnh scroll để hiển thị trung tâm
+                this.container.scrollLeft = 500;
+                this.container.scrollTop = 300;
             }
 
             createNode(text, x, y, className) {
@@ -906,16 +969,24 @@
                 node.style.left = `${x}px`;
                 node.style.top = `${y}px`;
                 node.style.position = 'absolute';
-                node.style.transform = 'translate(-50%, -50%)';
+                node.style.transform = 'translate(-50%, -50%)'; // QUAN TRỌNG: căn giữa node
                 node.style.zIndex = '2';
-                node.style.maxWidth = '200px';
-                node.style.minWidth = '140px';
+                node.style.maxWidth = '180px';
+                node.style.minWidth = '120px';
                 node.style.wordWrap = 'break-word';
                 node.style.textAlign = 'center';
                 node.style.cursor = 'pointer';
                 
+                // Mobile adjustment
+                if (window.innerWidth <= 768) {
+                    node.style.maxWidth = '150px';
+                    node.style.minWidth = '100px';
+                    node.style.fontSize = '0.8rem';
+                    node.style.padding = '10px 12px';
+                }
+                
                 // Thêm tooltip cho node dài
-                if (text.length > 50) {
+                if (text.length > 40) {
                     node.title = text;
                 }
                 
@@ -941,38 +1012,35 @@
 
             // BẬT CHỨC NĂNG KÉO VÀ ZOOM
             enablePanAndZoom(canvas) {
-                let isDragging = false;
-                let startX, startY, scrollLeft, scrollTop;
-
                 // Pan với mouse
                 this.container.addEventListener('mousedown', (e) => {
-                    isDragging = true;
-                    startX = e.pageX - this.container.offsetLeft;
-                    startY = e.pageY - this.container.offsetTop;
-                    scrollLeft = this.container.scrollLeft;
-                    scrollTop = this.container.scrollTop;
+                    this.isDragging = true;
+                    this.startX = e.pageX - this.container.offsetLeft;
+                    this.startY = e.pageY - this.container.offsetTop;
+                    this.scrollLeft = this.container.scrollLeft;
+                    this.scrollTop = this.container.scrollTop;
                     this.container.style.cursor = 'grabbing';
                 });
 
                 this.container.addEventListener('mouseleave', () => {
-                    isDragging = false;
+                    this.isDragging = false;
                     this.container.style.cursor = 'grab';
                 });
 
                 this.container.addEventListener('mouseup', () => {
-                    isDragging = false;
+                    this.isDragging = false;
                     this.container.style.cursor = 'grab';
                 });
 
                 this.container.addEventListener('mousemove', (e) => {
-                    if (!isDragging) return;
+                    if (!this.isDragging) return;
                     e.preventDefault();
                     const x = e.pageX - this.container.offsetLeft;
                     const y = e.pageY - this.container.offsetTop;
-                    const walkX = (x - startX) * 2;
-                    const walkY = (y - startY) * 2;
-                    this.container.scrollLeft = scrollLeft - walkX;
-                    this.container.scrollTop = scrollTop - walkY;
+                    const walkX = (x - this.startX) * 2;
+                    const walkY = (y - this.startY) * 2;
+                    this.container.scrollLeft = this.scrollLeft - walkX;
+                    this.container.scrollTop = this.scrollTop - walkY;
                 });
 
                 // Zoom với scroll wheel
@@ -992,8 +1060,26 @@
                 });
 
                 // Touch support cho mobile
+                let touchStartX, touchStartY, initialScrollLeft, initialScrollTop;
+                
                 this.container.addEventListener('touchstart', (e) => {
-                    if (e.touches.length === 2) {
+                    if (e.touches.length === 1) {
+                        touchStartX = e.touches[0].pageX;
+                        touchStartY = e.touches[0].pageY;
+                        initialScrollLeft = this.container.scrollLeft;
+                        initialScrollTop = this.container.scrollTop;
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+
+                this.container.addEventListener('touchmove', (e) => {
+                    if (e.touches.length === 1) {
+                        const touchX = e.touches[0].pageX;
+                        const touchY = e.touches[0].pageY;
+                        const walkX = (touchX - touchStartX) * 2;
+                        const walkY = (touchY - touchStartY) * 2;
+                        this.container.scrollLeft = initialScrollLeft - walkX;
+                        this.container.scrollTop = initialScrollTop - walkY;
                         e.preventDefault();
                     }
                 }, { passive: false });
@@ -1399,6 +1485,22 @@
                 container.scrollTop = 300;
             }
         }
+
+        // Thêm sự kiện resize để điều chỉnh trên mobile
+        window.addEventListener('resize', function() {
+            const nodes = document.querySelectorAll('.node');
+            nodes.forEach(node => {
+                if (window.innerWidth <= 768) {
+                    node.style.maxWidth = '150px';
+                    node.style.minWidth = '100px';
+                    node.style.fontSize = '0.8rem';
+                } else {
+                    node.style.maxWidth = '180px';
+                    node.style.minWidth = '120px';
+                    node.style.fontSize = '';
+                }
+            });
+        });
     </script>
 </body>
 </html>
