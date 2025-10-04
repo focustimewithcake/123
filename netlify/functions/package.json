@@ -1,0 +1,10 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for AI Mind Map",
+  "main": "ai-mindmap-bot.js",
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}
