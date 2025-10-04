@@ -1,46 +1,45 @@
-// netlify/functions/ai-mindmap-bot.js - CẬP NHẬT PHẦN PHÂN TÍCH
-class MindMapAIBot {
-  // ... (giữ nguyên constructor và các method cơ bản)
-
-  // PHƯƠNG PHÁP TÓM TẮT THÔNG MINH MỚI
-  summarizeSentence(sentence, maxWords = 10) {
-    const words = this.extractWords(sentence);
-    
-    // Loại bỏ từ trùng lặp và ít ý nghĩa
-    const uniqueWords = [...new Set(words)];
-    
-    // Ưu tiên từ dài (thường chứa nhiều thông tin hơn)
-    const meaningfulWords = uniqueWords
-      .filter(word => word.length > 3)
-      .sort((a, b) => b.length - a.length)
-      .slice(0, maxWords);
-    
-    // Tạo câu tóm tắt tự nhiên
-    if (meaningfulWords.length >= 3) {
-      return meaningfulWords.slice(0, 5).join(' ') + '...';
-    } else {
-      // Nếu không đủ từ quan trọng, cắt ngắn câu gốc
-      return sentence.length > 60 ? sentence.substring(0, 60) + '...' : sentence;
-    }
+// netlify/functions/ai-mindmap-bot.js
+const MindMapAIBot = class {
+  constructor() {
+    this.vietnameseStopWords = new Set([
+      'và', 'của', 'là', 'có', 'được', 'trong', 'ngoài', 'trên', 'dưới', 'với',
+      'như', 'theo', 'từ', 'về', 'sau', 'trước', 'khi', 'nếu', 'thì', 'mà',
+      'này', 'đó', 'kia', 'ai', 'gì', 'nào', 'sao', 'vì', 'tại', 'do', 'bởi',
+      'cho', 'đến', 'lên', 'xuống', 'ra', 'vào', 'ở', 'tại', 'bằng', 'đang',
+      'sẽ', 'đã', 'rất', 'quá', 'cũng', 'vẫn', 'cứ', 'chỉ', 'mỗi', 'từng',
+      'một', 'hai', 'ba', 'bốn', 'năm', 'mấy', 'nhiều', 'ít', 'các', 'những',
+      'mọi', 'toàn', 'cả', 'chính', 'ngay', 'luôn', 'vừa', 'mới', 'đều', 'chưa'
+    ]);
   }
 
-  // PHÂN TÍCH VĂN BẢN THÔNG MINH HƠN
+  generateMindMap(text, style = 'balanced', complexity = 'medium') {
+    console.log('🤖 AI Bot đang phân tích văn bản...');
+    
+    const cleanedText = this.cleanText(text);
+    const analysis = this.analyzeText(cleanedText);
+    const mindmap = this.createMindMapStructure(analysis, style, complexity);
+    
+    return mindmap;
+  }
+
+  cleanText(text) {
+    if (!text) return '';
+    return text
+      .replace(/[^\w\sÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýĂăĐđĨĩŨũƠơƯưẠ-ỹ]/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   analyzeText(text) {
     const sentences = this.splitSentences(text);
     const words = this.extractWords(text);
     const wordFreq = this.calculateWordFrequency(words);
     const keywords = this.extractKeywords(wordFreq);
-    
-    // Tóm tắt các câu thay vì dùng nguyên văn
-    const summarizedSentences = sentences.map(sentence => 
-      this.summarizeSentence(sentence, 8)
-    );
-    
     const scoredSentences = this.scoreSentences(sentences, wordFreq);
     const topics = this.groupSentencesByTopic(scoredSentences, keywords);
     
     return {
-      sentences: summarizedSentences, // Dùng câu đã tóm tắt
+      sentences,
       words,
       wordFreq,
       keywords,
@@ -51,43 +50,52 @@ class MindMapAIBot {
     };
   }
 
-  // TẠO SUBTOPICS THÔNG MINH - KHÔNG TRÙNG LẶP
-  createSubTopics(relatedSentences, style) {
-    const subTopics = new Set(); // Dùng Set để tránh trùng lặp
-    
-    relatedSentences.forEach(sentence => {
-      // Tóm tắt câu thành ý chính
-      const summarized = this.summarizeSentence(sentence, 6);
-      
-      // Đảm bảo không trùng lặp
-      if (!subTopics.has(summarized) && summarized.length > 10) {
-        subTopics.add(summarized);
-      }
-    });
-    
-    // Chuyển Set thành Array và thêm style
-    return Array.from(subTopics)
-      .slice(0, 4)
-      .map(topic => {
-        if (style === 'creative') {
-          const emojis = ['🌟', '💫', '🔥', '⚡', '🎯', '✨'];
-          const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-          return `${randomEmoji} ${topic}`;
-        }
-        return topic;
-      });
+  splitSentences(text) {
+    if (!text) return [];
+    return text.split(/[.!?]+/).filter(s => s.trim().length > 5);
   }
 
-  // XÁC ĐỊNH CHỦ ĐỀ TRUNG TÂM THÔNG MINH HƠN
-  determineCentralTopic(analysis) {
-    // Tìm câu có điểm cao nhất và tóm tắt nó
-    if (analysis.scoredSentences.length > 0) {
-      const bestSentence = analysis.scoredSentences[0].text;
-      return this.summarizeSentence(bestSentence, 12);
-    }
-    
-    // Fallback: kết hợp từ khóa quan trọng
-    const topKeywords = analysis.keywords.slice(0, 3).join(' • ');
-    return topKeywords || "Chủ đề phân tích";
+  extractWords(text) {
+    if (!text) return [];
+    return text
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(word => 
+        word.length > 2 && 
+        !this.vietnameseStopWords.has(word) &&
+        !/\d/.test(word)
+      );
   }
-}
+
+  calculateWordFrequency(words) {
+    const freq = {};
+    words.forEach(word => {
+      freq[word] = (freq[word] || 0) + 1;
+    });
+    return freq;
+  }
+
+  extractKeywords(wordFreq) {
+    const totalWords = Object.values(wordFreq).reduce((a, b) => a + b, 0);
+    if (totalWords === 0) return [];
+    
+    return Object.entries(wordFreq)
+      .map(([word, count]) => ({
+        word,
+        frequency: count,
+        score: count / totalWords
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 15)
+      .map(item => item.word);
+  }
+
+  scoreSentences(sentences, wordFreq) {
+    const totalFrequency = Object.values(wordFreq).reduce((a, b) => a + b, 0);
+    if (totalFrequency === 0) return sentences.map(s => ({ text: s, score: 0, wordCount: 0 }));
+    
+    return sentences.map(sentence => {
+      const sentenceWords = this.extractWords(sentence);
+      let score = 0;
+      
+      sentence
