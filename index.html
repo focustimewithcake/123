@@ -301,20 +301,20 @@
             flex-direction: column;
         }
 
-        /* FIX: Container với scroll và zoom - CẢI THIỆN CHO MOBILE */
+        /* Container với scroll và zoom */
         .mindmap-container {
             flex: 1;
             background: white;
             border-radius: 12px;
             padding: 0;
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            min-height: 400px;
+            min-height: 500px;
             position: relative;
             overflow: auto;
             cursor: grab;
             border: 2px solid #e9ecef;
             width: 100%;
-            -webkit-overflow-scrolling: touch; /* Quan trọng cho iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
         .mindmap-container:active {
@@ -324,9 +324,8 @@
         .mindmap-canvas {
             transition: transform 0.1s ease;
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            min-width: 800px;
-            min-height: 600px;
             position: relative;
+            transform-origin: 0 0;
         }
 
         /* Controls cho zoom */
@@ -390,7 +389,7 @@
             background: var(--primary-color);
         }
 
-        /* FIX: Node được cải thiện cho mobile */
+        /* Node được cải thiện */
         .node {
             position: absolute;
             padding: 12px 16px;
@@ -472,12 +471,7 @@
             }
             
             .mindmap-container {
-                min-height: 350px;
-            }
-            
-            .mindmap-canvas {
-                min-width: 600px;
-                min-height: 500px;
+                min-height: 400px;
             }
         }
 
@@ -797,7 +791,7 @@
         class SmartMindMapRenderer {
             constructor(container) {
                 this.container = container;
-                this.zoomLevel = 1;
+                this.zoomLevel = 0.5; // Bắt đầu với zoom nhỏ để xem toàn bộ
                 this.isDragging = false;
                 this.startX = 0;
                 this.startY = 0;
@@ -805,16 +799,19 @@
                 this.scrollTop = 0;
             }
 
-            // THUẬT TOÁN BỐ CỤC MỚI - PHÂN TÁN THÔNG MINH
+            // THUẬT TOÁN BỐ CỤC MỚI - TRÁNH CHỒNG CHÉO
             calculateSmartLayout(centralTopic, mainBranches) {
+                console.log("Calculating layout for:", centralTopic, mainBranches);
+                
                 const layout = {
-                    central: { x: 800, y: 500 }, // Vị trí trung tâm trong canvas lớn
-                    branches: [],
-                    bounds: { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+                    central: { x: 600, y: 400 }, // Vị trí trung tâm
+                    branches: []
                 };
 
                 const branchCount = mainBranches.length;
-                const baseRadius = 250;
+                
+                // Tính toán bán kính dựa trên số lượng nhánh
+                const baseRadius = Math.max(200, branchCount * 60);
 
                 mainBranches.forEach((branch, index) => {
                     const angle = (2 * Math.PI * index) / branchCount;
@@ -828,10 +825,10 @@
                         subTopics: []
                     };
 
-                    // CẢI THIỆN: Phân bố subtopics theo hình nan quạt
+                    // Phân bố subtopics theo hình nan quạt, tránh chồng chéo
                     const subTopicCount = branch.subTopics.length;
-                    const subRadius = 180;
-                    const fanAngle = Math.PI * 0.8; // Góc nan quạt 144 độ
+                    const subRadius = Math.max(120, subTopicCount * 40);
+                    const fanAngle = Math.min(Math.PI * 1.2, Math.PI * 0.6 + subTopicCount * 0.2);
                     const startAngle = angle - fanAngle / 2;
 
                     branch.subTopics.forEach((subTopic, subIndex) => {
@@ -844,38 +841,34 @@
                             x: subX,
                             y: subY
                         });
-
-                        // Cập nhật biên để tính toán kích thước canvas
-                        this.updateBounds(layout.bounds, subX, subY);
                     });
 
-                    this.updateBounds(layout.bounds, branchX, branchY);
                     layout.branches.push(branchLayout);
                 });
 
-                this.updateBounds(layout.bounds, layout.central.x, layout.central.y);
                 return layout;
             }
 
-            updateBounds(bounds, x, y) {
-                bounds.minX = Math.min(bounds.minX, x - 100);
-                bounds.minY = Math.min(bounds.minY, y - 50);
-                bounds.maxX = Math.max(bounds.maxX, x + 100);
-                bounds.maxY = Math.max(bounds.maxY, y + 50);
-            }
-
-            // RENDER VỚI SCROLL VÀ ZOOM
+            // RENDER VỚI SCROLL VÀ ZOOM - BẮT ĐẦU VỚI ZOOM NHỎ
             renderMindMap(mindmapData) {
+                console.log("Rendering mind map with data:", mindmapData);
+                
+                if (!mindmapData || !mindmapData.centralTopic || !mindmapData.mainBranches) {
+                    console.error("Invalid mindmap data:", mindmapData);
+                    this.showError("Dữ liệu sơ đồ không hợp lệ");
+                    return;
+                }
+
                 this.container.innerHTML = '';
                 
                 // Thêm controls
                 const controls = document.createElement('div');
                 controls.className = 'zoom-controls';
                 controls.innerHTML = `
-                    <button class="zoom-btn" onclick="zoomOut()">-</button>
-                    <div class="zoom-display" id="zoomLevel">100%</div>
-                    <button class="zoom-btn" onclick="zoomIn()">+</button>
-                    <button class="zoom-btn" onclick="resetZoom()" style="background: #95a5a6;">
+                    <button class="zoom-btn" onclick="mindmapRenderer.zoomOut()">-</button>
+                    <div class="zoom-display" id="zoomLevel">${Math.round(this.zoomLevel * 100)}%</div>
+                    <button class="zoom-btn" onclick="mindmapRenderer.zoomIn()">+</button>
+                    <button class="zoom-btn" onclick="mindmapRenderer.resetZoom()" style="background: #95a5a6;">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 `;
@@ -887,14 +880,15 @@
                 instructions.innerHTML = '🖱️ Kéo để di chuyển • 🔍 Cuộn chuột để zoom';
                 this.container.appendChild(instructions);
 
-                // Tạo canvas ảo lớn để chứa toàn bộ sơ đồ
+                // Tạo canvas với kích thước lớn để chứa toàn bộ sơ đồ
                 const canvas = document.createElement('div');
                 canvas.className = 'mindmap-canvas';
-                canvas.style.width = '2000px';
-                canvas.style.height = '1500px';
+                canvas.style.width = '1200px';
+                canvas.style.height = '900px';
                 canvas.style.position = 'relative';
                 canvas.style.background = 'linear-gradient(135deg, #f8f9fa, #e9ecef)';
                 canvas.style.transformOrigin = '0 0';
+                canvas.style.transform = `scale(${this.zoomLevel})`;
 
                 // Tính toán layout
                 const layout = this.calculateSmartLayout(
@@ -912,7 +906,12 @@
                 canvas.appendChild(centralNode);
 
                 // Tạo các nhánh và kết nối
-                layout.branches.forEach(branch => {
+                layout.branches.forEach((branch, index) => {
+                    if (!branch.title || !branch.subTopics) {
+                        console.warn("Invalid branch data:", branch);
+                        return;
+                    }
+
                     const branchNode = this.createNode(
                         branch.title,
                         branch.x,
@@ -921,6 +920,7 @@
                     );
                     canvas.appendChild(branchNode);
 
+                    // Kết nối từ trung tâm đến nhánh chính
                     this.createConnection(
                         layout.central.x,
                         layout.central.y,
@@ -929,7 +929,13 @@
                         canvas
                     );
 
-                    branch.subTopics.forEach(subTopic => {
+                    // Tạo các subtopic
+                    branch.subTopics.forEach((subTopic, subIndex) => {
+                        if (!subTopic.text) {
+                            console.warn("Invalid subtopic data:", subTopic);
+                            return;
+                        }
+
                         const subNode = this.createNode(
                             subTopic.text,
                             subTopic.x,
@@ -938,6 +944,7 @@
                         );
                         canvas.appendChild(subNode);
 
+                        // Kết nối từ nhánh chính đến subtopic
                         this.createConnection(
                             branch.x,
                             branch.y,
@@ -957,9 +964,13 @@
                 // Hiệu ứng mượt mà
                 this.addSmoothAnimations();
                 
-                // Điều chỉnh scroll để hiển thị trung tâm
-                this.container.scrollLeft = 500;
-                this.container.scrollTop = 300;
+                // Điều chỉnh scroll để hiển thị toàn bộ sơ đồ (với zoom nhỏ)
+                setTimeout(() => {
+                    this.container.scrollLeft = (canvas.offsetWidth * this.zoomLevel - this.container.offsetWidth) / 2;
+                    this.container.scrollTop = (canvas.offsetHeight * this.zoomLevel - this.container.offsetHeight) / 2;
+                }, 100);
+                
+                console.log("Mind map rendered successfully with initial zoom:", this.zoomLevel);
             }
 
             createNode(text, x, y, className) {
@@ -969,7 +980,7 @@
                 node.style.left = `${x}px`;
                 node.style.top = `${y}px`;
                 node.style.position = 'absolute';
-                node.style.transform = 'translate(-50%, -50%)'; // QUAN TRỌNG: căn giữa node
+                node.style.transform = 'translate(-50%, -50%)';
                 node.style.zIndex = '2';
                 node.style.maxWidth = '180px';
                 node.style.minWidth = '120px';
@@ -1048,12 +1059,11 @@
                     e.preventDefault();
                     const zoomIntensity = 0.1;
                     const wheel = e.deltaY < 0 ? 1 : -1;
-                    const newZoom = Math.max(0.5, Math.min(2, this.zoomLevel + wheel * zoomIntensity));
+                    const newZoom = Math.max(0.3, Math.min(2, this.zoomLevel + wheel * zoomIntensity));
                     
                     if (newZoom !== this.zoomLevel) {
                         this.zoomLevel = newZoom;
                         canvas.style.transform = `scale(${this.zoomLevel})`;
-                        canvas.style.transformOrigin = '0 0';
                         document.getElementById('zoomLevel').textContent = 
                             Math.round(this.zoomLevel * 100) + '%';
                     }
@@ -1061,6 +1071,7 @@
 
                 // Touch support cho mobile
                 let touchStartX, touchStartY, initialScrollLeft, initialScrollTop;
+                let touchStartDistance = 0;
                 
                 this.container.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
@@ -1068,8 +1079,14 @@
                         touchStartY = e.touches[0].pageY;
                         initialScrollLeft = this.container.scrollLeft;
                         initialScrollTop = this.container.scrollTop;
-                        e.preventDefault();
+                    } else if (e.touches.length === 2) {
+                        // Pinch to zoom
+                        touchStartDistance = Math.hypot(
+                            e.touches[0].pageX - e.touches[1].pageX,
+                            e.touches[0].pageY - e.touches[1].pageY
+                        );
                     }
+                    e.preventDefault();
                 }, { passive: false });
 
                 this.container.addEventListener('touchmove', (e) => {
@@ -1080,6 +1097,26 @@
                         const walkY = (touchY - touchStartY) * 2;
                         this.container.scrollLeft = initialScrollLeft - walkX;
                         this.container.scrollTop = initialScrollTop - walkY;
+                        e.preventDefault();
+                    } else if (e.touches.length === 2) {
+                        // Pinch to zoom
+                        const touchDistance = Math.hypot(
+                            e.touches[0].pageX - e.touches[1].pageX,
+                            e.touches[0].pageY - e.touches[1].pageY
+                        );
+                        
+                        if (touchStartDistance > 0) {
+                            const zoomChange = (touchDistance - touchStartDistance) * 0.01;
+                            const newZoom = Math.max(0.3, Math.min(2, this.zoomLevel + zoomChange));
+                            
+                            if (Math.abs(newZoom - this.zoomLevel) > 0.01) {
+                                this.zoomLevel = newZoom;
+                                canvas.style.transform = `scale(${this.zoomLevel})`;
+                                document.getElementById('zoomLevel').textContent = 
+                                    Math.round(this.zoomLevel * 100) + '%';
+                            }
+                        }
+                        touchStartDistance = touchDistance;
                         e.preventDefault();
                     }
                 }, { passive: false });
@@ -1108,6 +1145,50 @@
                         conn.style.width = conn.getAttribute('data-length') + 'px';
                     }, index * 120);
                 });
+            }
+
+            showError(message) {
+                this.container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--error-color);"></i>
+                        <h3>Lỗi khi tạo sơ đồ</h3>
+                        <p>${message}</p>
+                    </div>
+                `;
+            }
+
+            // Zoom functions
+            zoomIn() {
+                const canvas = this.container.querySelector('.mindmap-canvas');
+                if (canvas) {
+                    this.zoomLevel = Math.min(2, this.zoomLevel + 0.1);
+                    canvas.style.transform = `scale(${this.zoomLevel})`;
+                    document.getElementById('zoomLevel').textContent = Math.round(this.zoomLevel * 100) + '%';
+                }
+            }
+
+            zoomOut() {
+                const canvas = this.container.querySelector('.mindmap-canvas');
+                if (canvas) {
+                    this.zoomLevel = Math.max(0.3, this.zoomLevel - 0.1);
+                    canvas.style.transform = `scale(${this.zoomLevel})`;
+                    document.getElementById('zoomLevel').textContent = Math.round(this.zoomLevel * 100) + '%';
+                }
+            }
+
+            resetZoom() {
+                const canvas = this.container.querySelector('.mindmap-canvas');
+                if (canvas) {
+                    this.zoomLevel = 0.5; // Reset về zoom nhỏ để xem toàn bộ
+                    canvas.style.transform = `scale(${this.zoomLevel})`;
+                    document.getElementById('zoomLevel').textContent = '50%';
+                    
+                    // Reset scroll về giữa
+                    setTimeout(() => {
+                        this.container.scrollLeft = (canvas.offsetWidth * this.zoomLevel - this.container.offsetWidth) / 2;
+                        this.container.scrollTop = (canvas.offsetHeight * this.zoomLevel - this.container.offsetHeight) / 2;
+                    }, 100);
+                }
             }
         }
 
@@ -1317,6 +1398,7 @@
                     }
                     
                     const data = await response.json();
+                    console.log("Data received from AI:", data);
                     
                     // Cập nhật số lần sử dụng
                     usageManager.incrementUsage();
@@ -1451,55 +1533,6 @@
                     statusMessage.style.display = 'none';
                 }, 5000);
             }
-        });
-
-        // Functions cho zoom (global)
-        function zoomIn() {
-            const canvas = document.querySelector('.mindmap-canvas');
-            if (canvas) {
-                const currentZoom = parseFloat(canvas.style.transform.replace('scale(', '').replace(')', '')) || 1;
-                const newZoom = Math.min(2, currentZoom + 0.1);
-                canvas.style.transform = `scale(${newZoom})`;
-                document.getElementById('zoomLevel').textContent = Math.round(newZoom * 100) + '%';
-            }
-        }
-
-        function zoomOut() {
-            const canvas = document.querySelector('.mindmap-canvas');
-            if (canvas) {
-                const currentZoom = parseFloat(canvas.style.transform.replace('scale(', '').replace(')', '')) || 1;
-                const newZoom = Math.max(0.5, currentZoom - 0.1);
-                canvas.style.transform = `scale(${newZoom})`;
-                document.getElementById('zoomLevel').textContent = Math.round(newZoom * 100) + '%';
-            }
-        }
-
-        function resetZoom() {
-            const canvas = document.querySelector('.mindmap-canvas');
-            if (canvas) {
-                canvas.style.transform = 'scale(1)';
-                document.getElementById('zoomLevel').textContent = '100%';
-                // Reset scroll về giữa
-                const container = document.getElementById('mindmapContainer');
-                container.scrollLeft = 500;
-                container.scrollTop = 300;
-            }
-        }
-
-        // Thêm sự kiện resize để điều chỉnh trên mobile
-        window.addEventListener('resize', function() {
-            const nodes = document.querySelectorAll('.node');
-            nodes.forEach(node => {
-                if (window.innerWidth <= 768) {
-                    node.style.maxWidth = '150px';
-                    node.style.minWidth = '100px';
-                    node.style.fontSize = '0.8rem';
-                } else {
-                    node.style.maxWidth = '180px';
-                    node.style.minWidth = '120px';
-                    node.style.fontSize = '';
-                }
-            });
         });
     </script>
 </body>
