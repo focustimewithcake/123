@@ -301,7 +301,7 @@
             flex-direction: column;
         }
 
-        /* Container với scroll và zoom */
+        /* Container với scroll và zoom - FIXED */
         .mindmap-container {
             flex: 1;
             background: white;
@@ -326,6 +326,11 @@
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             position: relative;
             transform-origin: 0 0;
+            min-width: 100%;
+            min-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         /* Controls cho zoom */
@@ -581,7 +586,7 @@
             border-top: 1px solid #e9ecef;
         }
 
-        /* Mobile Optimization */
+        /* Mobile Optimization - FIXED SCROLL ISSUES */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -610,7 +615,7 @@
                 padding: 20px;
             }
             
-            /* Mindmap container optimization */
+            /* Mindmap container optimization - FIXED */
             .mindmap-container {
                 min-height: 400px;
                 overflow: auto;
@@ -622,6 +627,7 @@
                 min-width: 800px;
                 min-height: 600px;
                 transform-origin: 0 0;
+                display: block;
             }
             
             /* Node optimization for mobile */
@@ -769,6 +775,15 @@
             .connection {
                 height: 2px;
             }
+        }
+
+        /* Center alignment for mindmap */
+        .mindmap-center-helper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -945,11 +960,11 @@
             }
         }
 
-        // Bố cục thông minh cho mind map với scroll và zoom
+        // Bố cục thông minh cho mind map với scroll và zoom - IMPROVED
         class SmartMindMapRenderer {
             constructor(container) {
                 this.container = container;
-                this.zoomLevel = 0.5; // Bắt đầu với zoom nhỏ để xem toàn bộ
+                this.zoomLevel = 0.7; // Tăng zoom level để dễ nhìn hơn
                 this.isDragging = false;
                 this.startX = 0;
                 this.startY = 0;
@@ -957,27 +972,32 @@
                 this.scrollTop = 0;
             }
 
-            // THUẬT TOÁN BỐ CỤC MỚI - TỐI ƯU CHO MOBILE
+            // THUẬT TOÁN BỐ CỤC MỚI - CÂN ĐỐI HƠN
             calculateSmartLayout(centralTopic, mainBranches) {
-                console.log("Calculating optimized layout for:", centralTopic, mainBranches);
+                console.log("Calculating improved layout for:", centralTopic, mainBranches);
                 
                 const isMobile = window.innerWidth <= 768;
+                
+                // Tính toán kích thước canvas dựa trên số lượng nhánh
+                const branchCount = mainBranches.length;
+                const canvasWidth = isMobile ? 1000 : 1200;
+                const canvasHeight = isMobile ? 800 : 900;
+                
                 const layout = {
                     central: { 
-                        x: isMobile ? 400 : 600, 
-                        y: isMobile ? 300 : 400 
+                        x: canvasWidth / 2, 
+                        y: canvasHeight / 2 
                     },
                     branches: []
                 };
 
-                const branchCount = mainBranches.length;
-                
-                // Điều chỉnh bán kính dựa trên kích thước màn hình
+                // Điều chỉnh bán kính dựa trên kích thước màn hình và số nhánh
                 const baseRadius = isMobile ? 
-                    Math.max(150, branchCount * 50) : 
-                    Math.max(200, branchCount * 60);
+                    Math.max(180, branchCount * 60) : 
+                    Math.max(220, branchCount * 70);
 
                 mainBranches.forEach((branch, index) => {
+                    // Phân bố đều các nhánh xung quanh trung tâm
                     const angle = (2 * Math.PI * index) / branchCount;
                     const branchX = layout.central.x + Math.cos(angle) * baseRadius;
                     const branchY = layout.central.y + Math.sin(angle) * baseRadius;
@@ -989,19 +1009,18 @@
                         subTopics: []
                     };
 
-                    // Điều chỉnh cho subtopics trên mobile
+                    // Điều chỉnh cho subtopics - phân bố hợp lý hơn
                     const subTopicCount = branch.subTopics.length;
                     const subRadius = isMobile ? 
-                        Math.max(80, subTopicCount * 30) : 
-                        Math.max(120, subTopicCount * 40);
+                        Math.max(100, subTopicCount * 35) : 
+                        Math.max(140, subTopicCount * 45);
                         
-                    const fanAngle = isMobile ? 
-                        Math.min(Math.PI * 1.0, Math.PI * 0.5 + subTopicCount * 0.15) :
-                        Math.min(Math.PI * 1.2, Math.PI * 0.6 + subTopicCount * 0.2);
-                        
+                    // Góc phân bố subtopics - điều chỉnh để tránh chồng chéo
+                    const fanAngle = Math.min(Math.PI * 1.5, Math.PI * 0.8 + subTopicCount * 0.25);
                     const startAngle = angle - fanAngle / 2;
 
                     branch.subTopics.forEach((subTopic, subIndex) => {
+                        // Phân bố subtopics theo hình cung
                         const subAngle = startAngle + (fanAngle * (subIndex + 1)) / (subTopicCount + 1);
                         const subX = branchX + Math.cos(subAngle) * subRadius;
                         const subY = branchY + Math.sin(subAngle) * subRadius;
@@ -1016,12 +1035,16 @@
                     layout.branches.push(branchLayout);
                 });
 
-                return layout;
+                return {
+                    layout: layout,
+                    canvasWidth: canvasWidth,
+                    canvasHeight: canvasHeight
+                };
             }
 
-            // RENDER VỚI SCROLL VÀ ZOOM - BẮT ĐẦU VỚI ZOOM NHỎ
+            // RENDER VỚI SCROLL VÀ ZOOM - ĐÃ SỬA LỖI CĂN CHỈNH
             renderMindMap(mindmapData) {
-                console.log("Rendering mind map with data:", mindmapData);
+                console.log("Rendering improved mind map with data:", mindmapData);
                 
                 if (!mindmapData || !mindmapData.centralTopic || !mindmapData.mainBranches) {
                     console.error("Invalid mindmap data:", mindmapData);
@@ -1029,8 +1052,15 @@
                     return;
                 }
 
+                // Xóa nội dung cũ
                 this.container.innerHTML = '';
                 
+                // Tính toán layout
+                const { layout, canvasWidth, canvasHeight } = this.calculateSmartLayout(
+                    mindmapData.centralTopic, 
+                    mindmapData.mainBranches
+                );
+
                 // Thêm controls
                 const controls = document.createElement('div');
                 controls.className = 'zoom-controls';
@@ -1050,21 +1080,15 @@
                 instructions.innerHTML = '🖱️ Kéo để di chuyển • 🔍 Cuộn chuột để zoom';
                 this.container.appendChild(instructions);
 
-                // Tạo canvas với kích thước lớn để chứa toàn bộ sơ đồ
+                // Tạo canvas với kích thước phù hợp
                 const canvas = document.createElement('div');
                 canvas.className = 'mindmap-canvas';
-                canvas.style.width = '1200px';
-                canvas.style.height = '900px';
+                canvas.style.width = `${canvasWidth}px`;
+                canvas.style.height = `${canvasHeight}px`;
                 canvas.style.position = 'relative';
                 canvas.style.background = 'linear-gradient(135deg, #f8f9fa, #e9ecef)';
                 canvas.style.transformOrigin = '0 0';
                 canvas.style.transform = `scale(${this.zoomLevel})`;
-
-                // Tính toán layout
-                const layout = this.calculateSmartLayout(
-                    mindmapData.centralTopic, 
-                    mindmapData.mainBranches
-                );
 
                 // Tạo node trung tâm
                 const centralNode = this.createNode(
@@ -1134,13 +1158,26 @@
                 // Hiệu ứng mượt mà
                 this.addSmoothAnimations();
                 
-                // Điều chỉnh scroll để hiển thị toàn bộ sơ đồ (với zoom nhỏ)
+                // Căn giữa sơ đồ trong khung nhìn
                 setTimeout(() => {
-                    this.container.scrollLeft = (canvas.offsetWidth * this.zoomLevel - this.container.offsetWidth) / 2;
-                    this.container.scrollTop = (canvas.offsetHeight * this.zoomLevel - this.container.offsetHeight) / 2;
+                    this.centerMindMap(canvas);
                 }, 100);
                 
-                console.log("Mind map rendered successfully with initial zoom:", this.zoomLevel);
+                console.log("Mind map rendered successfully with improved layout");
+            }
+
+            centerMindMap(canvas) {
+                const containerWidth = this.container.clientWidth;
+                const containerHeight = this.container.clientHeight;
+                const canvasScaledWidth = canvas.offsetWidth * this.zoomLevel;
+                const canvasScaledHeight = canvas.offsetHeight * this.zoomLevel;
+                
+                // Tính toán vị trí scroll để căn giữa
+                const targetScrollLeft = (canvasScaledWidth - containerWidth) / 2;
+                const targetScrollTop = (canvasScaledHeight - containerHeight) / 2;
+                
+                this.container.scrollLeft = targetScrollLeft;
+                this.container.scrollTop = targetScrollTop;
             }
 
             createNode(text, x, y, className) {
@@ -1191,7 +1228,7 @@
                 parent.appendChild(connection);
             }
 
-            // BẬT CHỨC NĂNG KÉO VÀ ZOOM
+            // BẬT CHỨC NĂNG KÉO VÀ ZOOM - ĐÃ CẢI THIỆN
             enablePanAndZoom(canvas) {
                 // Pan với mouse
                 this.container.addEventListener('mousedown', (e) => {
@@ -1232,16 +1269,30 @@
                     const newZoom = Math.max(0.3, Math.min(2, this.zoomLevel + wheel * zoomIntensity));
                     
                     if (newZoom !== this.zoomLevel) {
+                        // Lưu vị trí scroll trước khi zoom
+                        const scrollX = this.container.scrollLeft;
+                        const scrollY = this.container.scrollTop;
+                        const mouseX = e.clientX - this.container.getBoundingClientRect().left;
+                        const mouseY = e.clientY - this.container.getBoundingClientRect().top;
+                        
+                        // Tính toán tỷ lệ zoom
+                        const zoomRatio = newZoom / this.zoomLevel;
+                        
                         this.zoomLevel = newZoom;
                         canvas.style.transform = `scale(${this.zoomLevel})`;
                         document.getElementById('zoomLevel').textContent = 
                             Math.round(this.zoomLevel * 100) + '%';
+                        
+                        // Điều chỉnh scroll để giữ vị trí con trỏ
+                        this.container.scrollLeft = scrollX * zoomRatio + (mouseX * zoomRatio - mouseX);
+                        this.container.scrollTop = scrollY * zoomRatio + (mouseY * zoomRatio - mouseY);
                     }
                 });
 
                 // Touch support cho mobile
                 let touchStartX, touchStartY, initialScrollLeft, initialScrollTop;
                 let touchStartDistance = 0;
+                let lastTouchDistance = 0;
                 
                 this.container.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
@@ -1255,19 +1306,18 @@
                             e.touches[0].pageX - e.touches[1].pageX,
                             e.touches[0].pageY - e.touches[1].pageY
                         );
+                        lastTouchDistance = touchStartDistance;
                     }
-                    e.preventDefault();
-                }, { passive: false });
+                }, { passive: true });
 
                 this.container.addEventListener('touchmove', (e) => {
-                    if (e.touches.length === 1) {
+                    if (e.touches.length === 1 && this.isDragging) {
                         const touchX = e.touches[0].pageX;
                         const touchY = e.touches[0].pageY;
                         const walkX = (touchX - touchStartX) * 2;
                         const walkY = (touchY - touchStartY) * 2;
                         this.container.scrollLeft = initialScrollLeft - walkX;
                         this.container.scrollTop = initialScrollTop - walkY;
-                        e.preventDefault();
                     } else if (e.touches.length === 2) {
                         // Pinch to zoom
                         const touchDistance = Math.hypot(
@@ -1275,8 +1325,8 @@
                             e.touches[0].pageY - e.touches[1].pageY
                         );
                         
-                        if (touchStartDistance > 0) {
-                            const zoomChange = (touchDistance - touchStartDistance) * 0.01;
+                        if (lastTouchDistance > 0) {
+                            const zoomChange = (touchDistance - lastTouchDistance) * 0.01;
                             const newZoom = Math.max(0.3, Math.min(2, this.zoomLevel + zoomChange));
                             
                             if (Math.abs(newZoom - this.zoomLevel) > 0.01) {
@@ -1286,10 +1336,14 @@
                                     Math.round(this.zoomLevel * 100) + '%';
                             }
                         }
-                        touchStartDistance = touchDistance;
-                        e.preventDefault();
+                        lastTouchDistance = touchDistance;
                     }
-                }, { passive: false });
+                }, { passive: true });
+
+                this.container.addEventListener('touchend', () => {
+                    this.isDragging = false;
+                    lastTouchDistance = 0;
+                });
 
                 this.container.style.cursor = 'grab';
             }
@@ -1327,36 +1381,57 @@
                 `;
             }
 
-            // Zoom functions
+            // Zoom functions - IMPROVED
             zoomIn() {
                 const canvas = this.container.querySelector('.mindmap-canvas');
                 if (canvas) {
-                    this.zoomLevel = Math.min(2, this.zoomLevel + 0.1);
+                    const newZoom = Math.min(2, this.zoomLevel + 0.1);
+                    const zoomRatio = newZoom / this.zoomLevel;
+                    
+                    // Lưu vị trí scroll hiện tại
+                    const scrollX = this.container.scrollLeft;
+                    const scrollY = this.container.scrollTop;
+                    
+                    this.zoomLevel = newZoom;
                     canvas.style.transform = `scale(${this.zoomLevel})`;
                     document.getElementById('zoomLevel').textContent = Math.round(this.zoomLevel * 100) + '%';
+                    
+                    // Điều chỉnh scroll để giữ vị trí
+                    this.container.scrollLeft = scrollX * zoomRatio;
+                    this.container.scrollTop = scrollY * zoomRatio;
                 }
             }
 
             zoomOut() {
                 const canvas = this.container.querySelector('.mindmap-canvas');
                 if (canvas) {
-                    this.zoomLevel = Math.max(0.3, this.zoomLevel - 0.1);
+                    const newZoom = Math.max(0.3, this.zoomLevel - 0.1);
+                    const zoomRatio = newZoom / this.zoomLevel;
+                    
+                    // Lưu vị trí scroll hiện tại
+                    const scrollX = this.container.scrollLeft;
+                    const scrollY = this.container.scrollTop;
+                    
+                    this.zoomLevel = newZoom;
                     canvas.style.transform = `scale(${this.zoomLevel})`;
                     document.getElementById('zoomLevel').textContent = Math.round(this.zoomLevel * 100) + '%';
+                    
+                    // Điều chỉnh scroll để giữ vị trí
+                    this.container.scrollLeft = scrollX * zoomRatio;
+                    this.container.scrollTop = scrollY * zoomRatio;
                 }
             }
 
             resetZoom() {
                 const canvas = this.container.querySelector('.mindmap-canvas');
                 if (canvas) {
-                    this.zoomLevel = 0.5; // Reset về zoom nhỏ để xem toàn bộ
+                    this.zoomLevel = 0.7;
                     canvas.style.transform = `scale(${this.zoomLevel})`;
-                    document.getElementById('zoomLevel').textContent = '50%';
+                    document.getElementById('zoomLevel').textContent = '70%';
                     
-                    // Reset scroll về giữa
+                    // Căn giữa sơ đồ
                     setTimeout(() => {
-                        this.container.scrollLeft = (canvas.offsetWidth * this.zoomLevel - this.container.offsetWidth) / 2;
-                        this.container.scrollTop = (canvas.offsetHeight * this.zoomLevel - this.container.offsetHeight) / 2;
+                        this.centerMindMap(canvas);
                     }, 100);
                 }
             }
