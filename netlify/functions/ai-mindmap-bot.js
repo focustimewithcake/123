@@ -8,12 +8,13 @@ const MindMapAIBot = class {
       'cho', 'đến', 'lên', 'xuống', 'ra', 'vào', 'ở', 'tại', 'bằng', 'đang',
       'sẽ', 'đã', 'rất', 'quá', 'cũng', 'vẫn', 'cứ', 'chỉ', 'mỗi', 'từng',
       'một', 'hai', 'ba', 'bốn', 'năm', 'mấy', 'nhiều', 'ít', 'các', 'những',
-      'mọi', 'toàn', 'cả', 'chính', 'ngay', 'luôn', 'vừa', 'mới', 'đều', 'chưa'
+      'mọi', 'toàn', 'cả', 'chính', 'ngay', 'luôn', 'vừa', 'mới', 'đều', 'chưa',
+      'vẫn', 'lại', 'chính', 'ngay', 'chứ', 'ơi', 'ừ', 'ôi', 'trời', 'ạ'
     ]);
 
-    this.MAX_TEXT_LENGTH = 1200;
-    this.MAX_SENTENCES = 15;
-    this.MAX_KEYPHRASES = 15;
+    this.MAX_TEXT_LENGTH = 1500;
+    this.MAX_SENTENCES = 20;
+    this.MAX_KEYPHRASES = 20;
   }
 
   generateMindMap(text, style = 'balanced', complexity = 'medium') {
@@ -56,17 +57,20 @@ const MindMapAIBot = class {
       const paragraphs = this.splitParagraphs(text);
       const keyPhrases = this.extractKeyPhrases(sentences);
       const centralTopic = this.findTrueCentralTopic(sentences, keyPhrases);
+      const topics = this.extractMainTopics(sentences, keyPhrases);
       
       console.log('✅ Phân tích hoàn thành:', {
         sentences: sentences.length,
         paragraphs: paragraphs.length,
-        keyPhrases: keyPhrases.length
+        keyPhrases: keyPhrases.length,
+        topics: topics.length
       });
       
       return {
         sentences: sentences.slice(0, this.MAX_SENTENCES),
         paragraphs: paragraphs.slice(0, 5),
         keyPhrases: keyPhrases.slice(0, this.MAX_KEYPHRASES),
+        topics: topics.slice(0, 6),
         centralTopic,
         totalSentences: Math.min(sentences.length, this.MAX_SENTENCES),
         totalParagraphs: Math.min(paragraphs.length, 5),
@@ -85,38 +89,53 @@ const MindMapAIBot = class {
     }
 
     try {
-      // Ưu tiên câu đầu tiên có độ dài hợp lý và chứa từ khóa
-      let centralTopic = sentences[0];
+      // Ưu tiên câu đầu tiên có độ dài hợp lý và chứa từ khóa quan trọng
+      let bestTopic = sentences[0];
       let bestScore = 0;
 
-      // Tính điểm cho mỗi câu dựa trên độ dài và từ khóa
-      sentences.slice(0, 8).forEach(sentence => {
+      // Xem xét 5 câu đầu tiên
+      const candidateSentences = sentences.slice(0, 5);
+      
+      candidateSentences.forEach((sentence, index) => {
         let score = 0;
         
-        // Điểm cho độ dài lý tưởng (20-60 ký tự)
-        if (sentence.length >= 20 && sentence.length <= 60) {
-          score += 3;
+        // Điểm cho độ dài lý tưởng (15-80 ký tự)
+        const length = sentence.length;
+        if (length >= 15 && length <= 80) {
+          score += 2;
         }
         
-        // Điểm cho việc chứa từ khóa quan trọng
-        keyPhrases.slice(0, 5).forEach(phrase => {
+        // Điểm cho vị trí (câu đầu điểm cao hơn)
+        const positionScore = Math.max(0, 3 - index);
+        score += positionScore;
+        
+        // Điểm cho từ khóa quan trọng
+        keyPhrases.slice(0, 3).forEach(phrase => {
           if (sentence.toLowerCase().includes(phrase.toLowerCase())) {
             score += 2;
           }
         });
         
-        // Điểm cho vị trí (câu đầu có điểm cao hơn)
-        const positionBonus = Math.max(0, 5 - sentences.indexOf(sentence));
-        score += positionBonus;
+        // Điểm cho các từ chỉ mục (first, second, các số thứ tự)
+        const hasOrderWords = /(đầu tiên|thứ nhất|thứ hai|thứ ba|thứ tư|thứ năm|thứ sáu|thứ bảy|thứ tám|thứ chín|thứ mười|trước tiên|tiếp theo|sau cùng|cuối cùng)/i.test(sentence);
+        if (hasOrderWords) {
+          score += 1;
+        }
+        
+        // Điểm cho câu hỏi hoặc câu khẳng định
+        const isQuestion = /^(tại sao|vì sao|làm thế nào|làm sao|như thế nào|cái gì|ai|khi nào|ở đâu)/i.test(sentence);
+        if (!isQuestion) {
+          score += 1;
+        }
 
         if (score > bestScore) {
           bestScore = score;
-          centralTopic = sentence;
+          bestTopic = sentence;
         }
       });
 
-      const conciseTopic = this.createConciseTopic(centralTopic);
-      console.log('🎯 Central topic:', conciseTopic);
+      const conciseTopic = this.createConciseTopic(bestTopic);
+      console.log('🎯 Central topic found:', conciseTopic);
       
       return conciseTopic;
     } catch (error) {
@@ -125,23 +144,109 @@ const MindMapAIBot = class {
     }
   }
 
+  // THUẬT TOÁN MỚI: Trích xuất chủ đề chính từ văn bản
+  extractMainTopics(sentences, keyPhrases) {
+    const topics = new Set();
+    
+    if (!sentences || sentences.length === 0) {
+      return [];
+    }
+
+    try {
+      // Nhóm câu theo chủ đề sử dụng từ khóa
+      const topicGroups = {};
+      
+      keyPhrases.slice(0, 8).forEach(phrase => {
+        topicGroups[phrase] = [];
+      });
+
+      // Phân phối câu vào các nhóm chủ đề
+      sentences.forEach(sentence => {
+        let bestGroup = null;
+        let bestScore = 0;
+        
+        Object.keys(topicGroups).forEach(topic => {
+          const score = this.calculateTopicRelevance(sentence, topic);
+          if (score > bestScore && score > 0.3) {
+            bestScore = score;
+            bestGroup = topic;
+          }
+        });
+        
+        if (bestGroup) {
+          topicGroups[bestGroup].push(sentence);
+        }
+      });
+
+      // Chọn các chủ đề có nhiều câu nhất
+      const sortedTopics = Object.keys(topicGroups)
+        .filter(topic => topicGroups[topic].length > 0)
+        .sort((a, b) => topicGroups[b].length - topicGroups[a].length)
+        .slice(0, 6);
+
+      sortedTopics.forEach(topic => {
+        if (topic.length > 5) {
+          topics.add(topic);
+        }
+      });
+
+      // Nếu không đủ chủ đề, bổ sung từ các câu quan trọng
+      if (topics.size < 3) {
+        sentences.slice(0, 8).forEach(sentence => {
+          if (sentence.length > 15 && sentence.length < 100) {
+            const cleanTopic = this.createThemeTitle(sentence);
+            if (cleanTopic && topics.size < 6) {
+              topics.add(cleanTopic);
+            }
+          }
+        });
+      }
+
+      return Array.from(topics);
+    } catch (error) {
+      console.error('❌ Lỗi extract main topics:', error);
+      return ['Khía cạnh 1', 'Khía cạnh 2', 'Khía cạnh 3'];
+    }
+  }
+
+  calculateTopicRelevance(sentence, topic) {
+    const sentenceWords = new Set(sentence.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+    const topicWords = new Set(topic.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+    
+    let commonWords = 0;
+    topicWords.forEach(word => {
+      if (sentenceWords.has(word)) {
+        commonWords++;
+      }
+    });
+    
+    return commonWords / Math.max(topicWords.size, 1);
+  }
+
   createConciseTopic(sentence) {
     if (!sentence) return "Nội dung chính";
     
-    let topic = sentence
-      .replace(/^(và|nhưng|tuy nhiên|do đó|vì vậy|đầu tiên|thứ nhất|sau đó|tiếp theo)\s+/i, '')
-      .replace(/[.!?]+$/, '')
-      .trim();
-    
-    // Giới hạn độ dài và đảm bảo ý nghĩa
-    if (topic.length > 40) {
-      const words = topic.split(/\s+/);
-      // Giữ lại 4-6 từ đầu để đảm bảo ý nghĩa
-      const keepWords = Math.min(Math.max(4, words.length), 6);
-      topic = words.slice(0, keepWords).join(' ') + '...';
+    try {
+      let topic = sentence
+        .replace(/^(và|nhưng|tuy nhiên|do đó|vì vậy|đầu tiên|thứ nhất|sau đó|tiếp theo|cuối cùng|trước tiên)\s+/i, '')
+        .replace(/[.!?]+$/, '')
+        .trim();
+      
+      // Loại bỏ phần thừa trong ngoặc đơn
+      topic = topic.replace(/\([^)]*\)/g, '').trim();
+      
+      // Giới hạn độ dài và đảm bảo ý nghĩa
+      if (topic.length > 45) {
+        const words = topic.split(/\s+/);
+        // Giữ lại 3-5 từ đầu để đảm bảo ý nghĩa
+        const keepWords = Math.min(Math.max(3, words.length), 6);
+        topic = words.slice(0, keepWords).join(' ') + '...';
+      }
+      
+      return this.capitalizeFirst(topic);
+    } catch (error) {
+      return "Nội dung chính";
     }
-    
-    return this.capitalizeFirst(topic);
   }
 
   splitMeaningfulSentences(text) {
@@ -150,7 +255,7 @@ const MindMapAIBot = class {
     try {
       return text.split(/[.!?]+/)
         .map(s => s.trim())
-        .filter(s => s.length > 8 && s.length < 150) // Nới rộng độ dài
+        .filter(s => s.length > 8 && s.length < 200) // Nới rộng độ dài
         .slice(0, this.MAX_SENTENCES);
     } catch (error) {
       console.error('❌ Lỗi split sentences:', error);
@@ -164,7 +269,7 @@ const MindMapAIBot = class {
     try {
       return text.split(/\n+/)
         .map(p => p.trim())
-        .filter(p => p.length > 15)
+        .filter(p => p.length > 20)
         .slice(0, 5);
     } catch (error) {
       console.error('❌ Lỗi split paragraphs:', error);
@@ -174,14 +279,14 @@ const MindMapAIBot = class {
 
   // THUẬT TOÁN MỚI: Trích xuất cụm từ khóa thông minh hơn
   extractKeyPhrases(sentences) {
-    const phrases = new Set();
+    const phrases = new Map(); // Sử dụng Map để theo dõi tần suất
     
     if (!sentences || sentences.length === 0) {
       return [];
     }
 
     try {
-      const processedSentences = sentences.slice(0, 8);
+      const processedSentences = sentences.slice(0, 10);
       
       processedSentences.forEach(sentence => {
         const words = sentence.split(/\s+/).filter(word => 
@@ -189,30 +294,36 @@ const MindMapAIBot = class {
         );
         
         // Tạo cụm từ 2-3 từ, ưu tiên cụm tự nhiên
-        for (let i = 0; i < Math.min(words.length - 1, 6); i++) {
+        for (let i = 0; i < Math.min(words.length - 1, 8); i++) {
           // Cụm 2 từ
           if (i < words.length - 1) {
             const twoWordPhrase = `${words[i]} ${words[i+1]}`;
-            if (twoWordPhrase.length >= 6 && twoWordPhrase.length < 25) {
-              phrases.add(twoWordPhrase);
+            if (twoWordPhrase.length >= 6 && twoWordPhrase.length < 30) {
+              const count = phrases.get(twoWordPhrase) || 0;
+              phrases.set(twoWordPhrase, count + 1);
             }
           }
           
           // Cụm 3 từ (quan trọng hơn)
           if (i < words.length - 2) {
             const threeWordPhrase = `${words[i]} ${words[i+1]} ${words[i+2]}`;
-            if (threeWordPhrase.length >= 8 && threeWordPhrase.length < 35) {
-              phrases.add(threeWordPhrase);
+            if (threeWordPhrase.length >= 8 && threeWordPhrase.length < 40) {
+              const count = phrases.get(threeWordPhrase) || 0;
+              phrases.set(threeWordPhrase, count + 2); // Cụm 3 từ có trọng số cao hơn
             }
           }
-          
-          if (phrases.size >= this.MAX_KEYPHRASES) break;
         }
       });
       
-      // Chuyển thành mảng và sắp xếp theo độ dài (ưu tiên cụm dài hơn)
-      return Array.from(phrases)
-        .sort((a, b) => b.length - a.length)
+      // Sắp xếp theo tần suất và độ dài
+      return Array.from(phrases.entries())
+        .sort((a, b) => {
+          // Ưu tiên tần suất cao hơn
+          if (b[1] !== a[1]) return b[1] - a[1];
+          // Sau đó ưu tiên cụm từ dài hơn
+          return b[0].length - a[0].length;
+        })
+        .map(entry => entry[0])
         .slice(0, this.MAX_KEYPHRASES);
     } catch (error) {
       console.error('❌ Lỗi extract key phrases:', error);
@@ -225,8 +336,8 @@ const MindMapAIBot = class {
     
     try {
       const centralTopic = analysis.centralTopic || "Nội dung chính";
-      const mainThemes = this.identifyUniqueMainThemes(analysis, centralTopic);
-      const structuredBranches = this.createHierarchicalBranches(analysis, mainThemes, complexity, style);
+      const mainThemes = this.identifyQualityMainThemes(analysis, centralTopic);
+      const structuredBranches = this.createQualityBranches(analysis, mainThemes, complexity, style);
       
       const result = {
         centralTopic,
@@ -235,7 +346,7 @@ const MindMapAIBot = class {
           totalSentences: analysis.totalSentences,
           totalParagraphs: analysis.totalParagraphs,
           totalWords: analysis.totalWords,
-          keywords: analysis.keyPhrases.slice(0, 8),
+          keywords: analysis.keyPhrases.slice(0, 10),
           confidence: this.calculateConfidence(analysis)
         },
         metadata: {
@@ -243,7 +354,7 @@ const MindMapAIBot = class {
           style: style,
           complexity: complexity,
           timestamp: new Date().toISOString(),
-          version: "OPTIMIZED 2.0"
+          version: "IMPROVED 3.0"
         }
       };
       
@@ -255,18 +366,41 @@ const MindMapAIBot = class {
     }
   }
 
-  // THUẬT TOÁN MỚI: Xác định chủ đề chính thông minh hơn
-  identifyUniqueMainThemes(analysis, centralTopic) {
+  // THUẬT TOÁN MỚI: Xác định chủ đề chính chất lượng hơn
+  identifyQualityMainThemes(analysis, centralTopic) {
     const themes = new Set();
     const centralLower = centralTopic.toLowerCase();
     
     try {
-      // Ưu tiên các câu quan trọng không trùng với chủ đề trung tâm
-      if (analysis.sentences && analysis.sentences.length > 0) {
-        analysis.sentences.slice(0, 8).forEach(sentence => {
-          if (sentence.length > 15 && 
+      // Ưu tiên sử dụng các topics đã được trích xuất
+      if (analysis.topics && analysis.topics.length > 0) {
+        analysis.topics.forEach(topic => {
+          if (!this.isSimilarToCentralTopic(topic, centralLower) && 
+              this.isQualityTheme(topic)) {
+            themes.add(topic);
+          }
+        });
+      }
+      
+      // Bổ sung từ key phrases nếu cần
+      if (themes.size < 3 && analysis.keyPhrases) {
+        analysis.keyPhrases.slice(0, 8).forEach(phrase => {
+          if (phrase.length > 8 && 
+              !this.isSimilarToCentralTopic(phrase, centralLower) &&
+              this.isQualityTheme(phrase) &&
+              !this.isDuplicateTheme(phrase, Array.from(themes))) {
+            const theme = this.createThemeTitle(phrase);
+            if (theme && themes.size < 5) themes.add(theme);
+          }
+        });
+      }
+      
+      // Bổ sung từ các câu quan trọng
+      if (themes.size < 2 && analysis.sentences) {
+        analysis.sentences.slice(1, 6).forEach(sentence => {
+          if (sentence.length > 20 && 
               !this.isSimilarToCentralTopic(sentence, centralLower) &&
-              this.hasSubstantialContent(sentence)) {
+              this.isQualityTheme(sentence)) {
             const theme = this.createThemeTitle(sentence);
             if (theme && !this.isDuplicateTheme(theme, Array.from(themes))) {
               themes.add(theme);
@@ -275,43 +409,55 @@ const MindMapAIBot = class {
         });
       }
       
-      // Bổ sung từ key phrases nếu cần
-      if (themes.size < 3 && analysis.keyPhrases) {
-        analysis.keyPhrases.slice(0, 6).forEach(phrase => {
-          if (phrase.length > 10 && 
-              !this.isSimilarToCentralTopic(phrase, centralLower) &&
-              !this.isDuplicateTheme(phrase, Array.from(themes))) {
-            const theme = this.createThemeTitle(phrase);
-            if (theme && themes.size < 5) themes.add(theme);
-          }
-        });
-      }
-      
-      // Đảm bảo có ít nhất 2 chủ đề
+      // Đảm bảo có ít nhất 2 chủ đề chất lượng
       if (themes.size < 2) {
-        themes.add('Phân tích chi tiết');
-        themes.add('Ứng dụng thực tế');
+        if (analysis.totalSentences >= 3) {
+          themes.add('Phân tích chi tiết');
+          themes.add('Ứng dụng thực tế');
+        } else {
+          themes.add('Thông tin chính');
+          themes.add('Chi tiết bổ sung');
+        }
       }
       
       return Array.from(themes).slice(0, 4);
     } catch (error) {
       console.error('❌ Lỗi identify themes:', error);
-      return ['Khía cạnh chính', 'Phân tích', 'Ứng dụng'];
+      return ['Thông tin chính', 'Phân tích', 'Ứng dụng'];
     }
   }
 
-  hasSubstantialContent(sentence) {
-    const words = sentence.split(/\s+/).filter(word => 
-      word.length > 2 && !this.vietnameseStopWords.has(word.toLowerCase())
-    );
-    return words.length >= 3;
+  isQualityTheme(text) {
+    if (!text || text.length < 6) return false;
+    
+    const words = text.split(/\s+/);
+    if (words.length < 2) return false;
+    
+    // Kiểm tra xem có quá nhiều từ dừng không
+    const stopWordCount = words.filter(word => 
+      this.vietnameseStopWords.has(word.toLowerCase())
+    ).length;
+    
+    return stopWordCount <= words.length / 2;
   }
 
   isDuplicateTheme(newTheme, existingThemes) {
     const newLower = newTheme.toLowerCase();
-    return existingThemes.some(theme => 
-      theme.toLowerCase().includes(newLower) || newLower.includes(theme.toLowerCase())
-    );
+    return existingThemes.some(theme => {
+      const themeLower = theme.toLowerCase();
+      return themeLower.includes(newLower) || newLower.includes(themeLower) ||
+             this.calculateSimilarity(themeLower, newLower) > 0.7;
+    });
+  }
+
+  calculateSimilarity(text1, text2) {
+    const words1 = new Set(text1.split(/\s+/));
+    const words2 = new Set(text2.split(/\s+/));
+    
+    const intersection = new Set([...words1].filter(x => words2.has(x)));
+    const union = new Set([...words1, ...words2]);
+    
+    return intersection.size / union.size;
   }
 
   isSimilarToCentralTopic(text, centralLower) {
@@ -329,7 +475,8 @@ const MindMapAIBot = class {
         }
       });
       
-      return commonWords >= Math.min(2, centralWords.size);
+      return commonWords >= Math.min(2, centralWords.size) || 
+             this.calculateSimilarity(textLower, centralLower) > 0.5;
     } catch (error) {
       return false;
     }
@@ -340,14 +487,19 @@ const MindMapAIBot = class {
     
     try {
       let title = text.trim();
-      // Loại bỏ từ nối ở đầu
-      title = title.replace(/^(và|nhưng|tuy nhiên|do đó|vì vậy|tuy nhiên|sau đó|tiếp theo)\s+/i, '');
+      // Loại bỏ từ nối ở đầu và các ký tự không cần thiết
+      title = title.replace(/^(và|nhưng|tuy nhiên|do đó|vì vậy|tuy nhiên|sau đó|tiếp theo|đầu tiên|thứ nhất)\s+/i, '');
+      title = title.replace(/[.!?]+$/, '');
       
       // Giới hạn độ dài nhưng đảm bảo ý nghĩa
-      if (title.length > 30) {
+      if (title.length > 35) {
         const words = title.split(/\s+/);
         const keepWords = Math.min(5, words.length);
         title = words.slice(0, keepWords).join(' ') + '...';
+      }
+      
+      if (title.length < 6) {
+        return null;
       }
       
       return this.capitalizeFirst(title);
@@ -356,14 +508,14 @@ const MindMapAIBot = class {
     }
   }
 
-  createHierarchicalBranches(analysis, mainThemes, complexity, style) {
+  createQualityBranches(analysis, mainThemes, complexity, style) {
     const branchCount = this.getBranchCount(complexity);
     const branches = [];
     const usedContent = new Set();
     
     try {
       mainThemes.slice(0, branchCount).forEach((theme, index) => {
-        const branch = this.createBranchStructure(theme, analysis, index, style, usedContent);
+        const branch = this.createQualityBranchStructure(theme, analysis, index, style, usedContent);
         if (branch && branch.subTopics.length > 0) {
           branches.push(branch);
         }
@@ -373,27 +525,50 @@ const MindMapAIBot = class {
     } catch (error) {
       console.error('❌ Lỗi tạo branches:', error);
       return [{
-        title: 'Nội dung chính',
-        subTopics: ['Thông tin quan trọng 1', 'Thông tin quan trọng 2']
+        title: 'Thông tin chính',
+        subTopics: ['Nội dung quan trọng 1', 'Nội dung quan trọng 2']
       }];
     }
   }
 
-  createBranchStructure(theme, analysis, index, style, usedContent) {
+  createQualityBranchStructure(theme, analysis, index, style, usedContent) {
     try {
       const branchTitle = this.formatBranchTitle(theme, style, index);
-      const subTopics = this.findRelevantSubTopics(theme, analysis, usedContent);
+      const subTopics = this.findQualitySubTopics(theme, analysis, usedContent);
       
       if (subTopics.length === 0) {
-        // Fallback: tạo subtopic từ key phrases
-        const fallbackSubTopics = analysis.keyPhrases
-          .slice(0, 3)
-          .filter(phrase => !usedContent.has(phrase.toLowerCase()))
-          .map(phrase => {
-            usedContent.add(phrase.toLowerCase());
-            return this.cleanSubTopic(phrase);
-          })
-          .filter(topic => topic);
+        // Fallback: tạo subtopic từ key phrases và sentences
+        const fallbackSubTopics = [];
+        
+        // Thử từ key phrases trước
+        if (analysis.keyPhrases) {
+          analysis.keyPhrases.slice(0, 4).forEach(phrase => {
+            if (!usedContent.has(phrase.toLowerCase()) && 
+                this.isRelevantToTheme(phrase, theme) &&
+                fallbackSubTopics.length < 3) {
+              const cleanTopic = this.cleanSubTopic(phrase);
+              if (cleanTopic) {
+                fallbackSubTopics.push(cleanTopic);
+                usedContent.add(phrase.toLowerCase());
+              }
+            }
+          });
+        }
+        
+        // Thử từ sentences nếu cần
+        if (fallbackSubTopics.length === 0 && analysis.sentences) {
+          analysis.sentences.slice(0, 6).forEach(sentence => {
+            if (!usedContent.has(sentence.toLowerCase()) && 
+                this.isRelevantToTheme(sentence, theme) &&
+                fallbackSubTopics.length < 3) {
+              const cleanTopic = this.cleanSubTopic(sentence);
+              if (cleanTopic) {
+                fallbackSubTopics.push(cleanTopic);
+                usedContent.add(sentence.toLowerCase());
+              }
+            }
+          });
+        }
         
         return {
           title: branchTitle,
@@ -403,7 +578,7 @@ const MindMapAIBot = class {
       
       return {
         title: branchTitle,
-        subTopics: subTopics.slice(0, 3)
+        subTopics: subTopics.slice(0, 4)
       };
     } catch (error) {
       console.error('❌ Lỗi tạo branch structure:', error);
@@ -411,7 +586,7 @@ const MindMapAIBot = class {
     }
   }
 
-  findRelevantSubTopics(theme, analysis, usedContent) {
+  findQualitySubTopics(theme, analysis, usedContent) {
     const subTopics = [];
     const themeLower = theme.toLowerCase();
     
@@ -419,13 +594,28 @@ const MindMapAIBot = class {
       // Tìm câu có liên quan đến chủ đề
       if (analysis.sentences) {
         analysis.sentences.forEach(sentence => {
-          if (this.calculateRelevance(sentence.toLowerCase(), themeLower) > 0.3) {
+          if (this.isRelevantToTheme(sentence, themeLower) && 
+              !usedContent.has(sentence.toLowerCase()) &&
+              this.isQualitySubTopic(sentence, themeLower)) {
             const cleanSubTopic = this.cleanSubTopic(sentence);
-            if (cleanSubTopic && 
-                !usedContent.has(cleanSubTopic.toLowerCase()) &&
-                !this.isTooSimilar(cleanSubTopic, themeLower)) {
+            if (cleanSubTopic) {
               subTopics.push(cleanSubTopic);
-              usedContent.add(cleanSubTopic.toLowerCase());
+              usedContent.add(sentence.toLowerCase());
+            }
+          }
+        });
+      }
+      
+      // Bổ sung từ key phrases nếu cần
+      if (subTopics.length < 2 && analysis.keyPhrases) {
+        analysis.keyPhrases.forEach(phrase => {
+          if (this.isRelevantToTheme(phrase, themeLower) && 
+              !usedContent.has(phrase.toLowerCase()) &&
+              subTopics.length < 4) {
+            const cleanSubTopic = this.cleanSubTopic(phrase);
+            if (cleanSubTopic) {
+              subTopics.push(cleanSubTopic);
+              usedContent.add(phrase.toLowerCase());
             }
           }
         });
@@ -436,6 +626,28 @@ const MindMapAIBot = class {
       console.error('❌ Lỗi tìm subtopics:', error);
       return ['Chi tiết quan trọng'];
     }
+  }
+
+  isRelevantToTheme(text, themeLower) {
+    const textLower = text.toLowerCase();
+    const relevance = this.calculateTopicRelevance(textLower, themeLower);
+    return relevance > 0.2 && !this.isTooSimilar(textLower, themeLower);
+  }
+
+  isQualitySubTopic(text, themeLower) {
+    if (!text || text.length < 10) return false;
+    
+    const textLower = text.toLowerCase();
+    const words = textLower.split(/\s+/).filter(w => w.length > 2);
+    
+    // Kiểm tra có đủ từ có nghĩa không
+    if (words.length < 2) return false;
+    
+    // Kiểm tra độ trùng lặp với theme
+    const themeWords = new Set(themeLower.split(/\s+/).filter(w => w.length > 2));
+    const commonWords = words.filter(word => themeWords.has(word));
+    
+    return commonWords.length < themeWords.size;
   }
 
   isTooSimilar(subTopic, themeLower) {
@@ -455,10 +667,10 @@ const MindMapAIBot = class {
 
   formatBranchTitle(theme, style, index) {
     const stylePrefixes = {
-      'academic': ['Phân tích', 'Nghiên cứu', 'Khái niệm', 'Ứng dụng'],
-      'creative': ['Ý tưởng', 'Giải pháp', 'Phát triển', 'Sáng tạo'],
-      'business': ['Chiến lược', 'Kế hoạch', 'Giải pháp', 'Triển khai'],
-      'balanced': ['Khía cạnh', 'Góc nhìn', 'Phương diện', 'Quan điểm']
+      'academic': ['Phân tích', 'Nghiên cứu', 'Khái niệm', 'Ứng dụng', 'Thảo luận'],
+      'creative': ['Ý tưởng', 'Giải pháp', 'Phát triển', 'Sáng tạo', 'Đổi mới'],
+      'business': ['Chiến lược', 'Kế hoạch', 'Giải pháp', 'Triển khai', 'Phát triển'],
+      'balanced': ['Khía cạnh', 'Góc nhìn', 'Phương diện', 'Quan điểm', 'Vấn đề']
     };
     
     const prefixes = stylePrefixes[style] || stylePrefixes.balanced;
@@ -467,40 +679,23 @@ const MindMapAIBot = class {
     return `${prefix}: ${theme}`;
   }
 
-  calculateRelevance(text, theme) {
-    try {
-      const textWords = new Set(text.split(/\s+/).filter(w => w.length > 2));
-      const themeWords = new Set(theme.split(/\s+/).filter(w => w.length > 2));
-      
-      let commonWords = 0;
-      themeWords.forEach(word => {
-        if (textWords.has(word)) {
-          commonWords++;
-        }
-      });
-      
-      return commonWords / Math.max(themeWords.size, 1);
-    } catch (error) {
-      return 0;
-    }
-  }
-
   cleanSubTopic(text) {
     if (!text) return null;
     
     try {
       let cleanText = text.trim();
       // Loại bỏ từ nối ở đầu
-      cleanText = cleanText.replace(/^(có thể|được|là|của|trong|về|theo)\s+/i, '');
+      cleanText = cleanText.replace(/^(có thể|được|là|của|trong|về|theo|với|và|nhưng)\s+/i, '');
+      cleanText = cleanText.replace(/[.!?]+$/, '');
       
       // Giới hạn độ dài
-      if (cleanText.length > 60) {
+      if (cleanText.length > 70) {
         const words = cleanText.split(/\s+/);
-        const keepWords = Math.min(8, words.length);
+        const keepWords = Math.min(10, words.length);
         cleanText = words.slice(0, keepWords).join(' ') + '...';
       }
       
-      if (cleanText.length < 10) {
+      if (cleanText.length < 8) {
         return null;
       }
       
@@ -515,7 +710,7 @@ const MindMapAIBot = class {
       'simple': 2,
       'medium': 3,
       'detailed': 4,
-      'comprehensive': 4
+      'comprehensive': 5
     };
     return counts[complexity] || 3;
   }
@@ -527,13 +722,15 @@ const MindMapAIBot = class {
       const sentenceCount = analysis.totalSentences || 0;
       const paragraphCount = analysis.totalParagraphs || 0;
       const wordCount = analysis.totalWords || 0;
+      const topicCount = analysis.topics ? analysis.topics.length : 0;
       
       let confidence = 0;
       
-      if (sentenceCount >= 3) confidence += 0.3;
+      if (sentenceCount >= 3) confidence += 0.2;
       if (sentenceCount >= 6) confidence += 0.2;
-      if (paragraphCount >= 2) confidence += 0.3;
+      if (paragraphCount >= 2) confidence += 0.2;
       if (wordCount >= 50) confidence += 0.2;
+      if (topicCount >= 2) confidence += 0.2;
       
       return Math.min(confidence, 0.9);
     } catch (error) {
@@ -551,6 +748,7 @@ const MindMapAIBot = class {
       sentences: [],
       paragraphs: [],
       keyPhrases: [],
+      topics: [],
       centralTopic: "Nội dung chính",
       totalSentences: 0,
       totalParagraphs: 0,
@@ -583,7 +781,7 @@ const MindMapAIBot = class {
         style: "balanced",
         complexity: "medium",
         timestamp: new Date().toISOString(),
-        version: "FALLBACK 2.0"
+        version: "FALLBACK 3.0"
       }
     };
   }
@@ -591,7 +789,7 @@ const MindMapAIBot = class {
 
 // Export function với timeout ngắn hơn cho mobile
 exports.handler = async (event) => {
-  console.log('=== AI MIND MAP BOT - OPTIMIZED VERSION 2.0 ===');
+  console.log('=== AI MIND MAP BOT - IMPROVED VERSION 3.0 ===');
   
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -646,7 +844,7 @@ exports.handler = async (event) => {
       };
     }
 
-    const processedText = text.length > 1200 ? text.substring(0, 1200) : text;
+    const processedText = text.length > 1500 ? text.substring(0, 1500) : text;
     
     console.log('🤖 AI Bot xử lý văn bản, độ dài:', processedText.length);
     
@@ -655,7 +853,7 @@ exports.handler = async (event) => {
     // Giảm timeout cho mobile
     const mindmapPromise = aiBot.generateMindMap(processedText, style, complexity);
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Function timeout')), 5000); // Giảm xuống 5 giây
+      setTimeout(() => reject(new Error('Function timeout')), 8000);
     });
 
     const mindmapData = await Promise.race([mindmapPromise, timeoutPromise]);
