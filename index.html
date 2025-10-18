@@ -1921,52 +1921,60 @@ function createSelectablePlane(vertices, planeName) {
             
             return Math.max(size.x, size.y, size.z);
         }
+// SỬA HÀM createNewModel:
+function createNewModel(shapeType) {
+    // CHỈ xóa các đối tượng liên quan đến hình khối cũ
+    // KHÔNG xóa các mặt phẳng đã tô màu
+    if (createdModels.length > 0) {
+        deleteMesh(createdModels[0]);
+    }
+    
+    let model = null;
+    
+    switch(shapeType) {
+        case 'cube':
+            model = createCube();
+            break;
+        case 'cuboid':
+            model = createCuboid();
+            break;
+        case 'tetrahedron':
+            model = createTetrahedron();
+            break;
+        case 'triangularPrism':
+            model = createTriangularPrism();
+            break;
+        case 'pyramid':
+            model = createPyramid();
+            break;
+        case 'triangularPyramid':
+            model = createTriangularPyramid();
+            break;
+    }
+    
+    if (model) {
+        model.userData = { type: 'model', movable: false, shapeType: shapeType };
+        scene.add(model);
+        createdModels.push(model);
+        
+        updateLeftPanel(model);
+        selectMesh(model);
+        updatePointDropdowns();
+        
+        showInfo(`Đã tạo hình ${getShapeName(shapeType)}`);
+    }
+    
+    return model;
+}
 
-        // Hàm tạo mô hình mới
-        function createNewModel(shapeType) {
-            // CHỈ xóa các đối tượng liên quan đến hình khối cũ
-            // KHÔNG xóa các mặt phẳng đã tô màu
-            if (createdModels.length > 0) {
-                deleteMesh(createdModels[0]);
-            }
-            
-            let model = null;
-            
-            switch(shapeType) {
-                case 'cube':
-                    model = createCube();
-                    break;
-                case 'cuboid':
-                    model = createCuboid();
-                    break;
-                case 'tetrahedron':
-                    model = createTetrahedron();
-                    break;
-                case 'triangularPrism':
-                    model = createTriangularPrism();
-                    break;
-                case 'pyramid':
-                    model = createPyramid();
-                    break;
-                case 'triangularPyramid':
-                    model = createTriangularPyramid();
-                    break;
-            }
-            
-            if (model) {
-                model.userData = { type: 'model', movable: false, shapeType: shapeType };
-                scene.add(model);
-                createdModels.push(model);
-                
-                updateLeftPanel(model);
-                selectMesh(model);
-                updatePointDropdowns();
-                
-                showInfo(`Đã tạo hình ${getShapeName(shapeType)}`);
-            }
-            
-            return model;
-        }
+        // THÊM HÀM NÀY NẾU MUỐN CÓ CHỨC NĂNG XÓA TẤT CẢ MẶT PHẲNG TÔ MÀU:
+function clearAllColoredPlanes() {
+    coloredPlanes.forEach(plane => {
+        scene.remove(plane);
+    });
+    coloredPlanes.length = 0;
+    showInfo('Đã xóa tất cả mặt phẳng tô màu');
+}
 
         // Hàm lấy tên hình khối
         function getShapeName(shapeType) {
