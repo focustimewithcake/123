@@ -2896,9 +2896,9 @@ function colorPlane(pointNames, color) {
     const material = new THREE.MeshStandardMaterial({
         color: colorNum,
         transparent: true,
-        opacity: 0.6,  // Tăng độ mờ lên một chút để dễ nhìn thấy
+        opacity: 0.7,  // Tăng độ mờ lên một chút để dễ nhìn thấy
         side: THREE.DoubleSide,
-        depthWrite: true,
+        depthWrite: false,
         depthTest: true
     });
     
@@ -2910,7 +2910,7 @@ function colorPlane(pointNames, color) {
     };
     
     // THÊM RENDER ORDER ĐỂ ĐẢM BẢO HIỂN THỊ ĐÚNG
-    plane.renderOrder = 1;
+    plane.renderOrder = 999;
     
     scene.add(plane);
     coloredPlanes.push(plane);
