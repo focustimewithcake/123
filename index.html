@@ -2855,67 +2855,69 @@ function deleteMesh(mesh) {
             return pointsArray;
         }
 
-        // Hàm tô màu mặt phẳng (ĐÃ SỬA LỖI BIẾN DẠNG)
-        function colorPlane(pointNames, color) {
-            const pointsArray = [];
-            for (let name of pointNames) {
-                if (!points[name]) {
-                    alert(`Điểm ${name} không tồn tại!`);
-                    return false;
-                }
-                pointsArray.push(points[name]);
-            }
-            
-            if (!isPlane(pointsArray)) {
-                alert('Các điểm không tạo thành một mặt phẳng!');
-                return false;
-            }
-            
-            // Sắp xếp các điểm để tạo mặt phẳng đúng
-            const sortedPoints = sortPointsForPlane(pointsArray);
-            
-            const geometry = new THREE.BufferGeometry();
-            const vertices = [];
-            
-            sortedPoints.forEach(point => {
-                vertices.push(point.x, point.y, point.z);
-            });
-            
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-            
-            // Tạo các tam giác cho đa giác
-            const indices = [];
-            for (let i = 1; i < sortedPoints.length - 1; i++) {
-                indices.push(0, i, i + 1);
-            }
-            
-            geometry.setIndex(indices);
-            geometry.computeVertexNormals();
-            
-            const colorNum = parseInt(color.replace('#', ''), 16);
-            
-            // Sử dụng MeshStandardMaterial để có hiệu ứng 3D tốt hơn
-            const material = new THREE.MeshStandardMaterial({
-                color: colorNum,
-                transparent: true,
-                opacity: 0.5,
-                side: THREE.DoubleSide,
-                depthWrite: true,
-                depthTest: true
-            });
-            
-            const plane = new THREE.Mesh(geometry, material);
-            plane.userData = {
-                type: 'coloredPlane',
-                points: pointNames,
-                color: color
-            };
-            
-            scene.add(plane);
-            coloredPlanes.push(plane);
-            
-            return true;
+  // TRONG HÀM colorPlane - CẢI THIỆN MATERIAL:
+function colorPlane(pointNames, color) {
+    const pointsArray = [];
+    for (let name of pointNames) {
+        if (!points[name]) {
+            alert(`Điểm ${name} không tồn tại!`);
+            return false;
         }
+        pointsArray.push(points[name]);
+    }
+    
+    if (!isPlane(pointsArray)) {
+        alert('Các điểm không tạo thành một mặt phẳng!');
+        return false;
+    }
+    
+    const sortedPoints = sortPointsForPlane(pointsArray);
+    
+    const geometry = new THREE.BufferGeometry();
+    const vertices = [];
+    
+    sortedPoints.forEach(point => {
+        vertices.push(point.x, point.y, point.z);
+    });
+    
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    
+    const indices = [];
+    for (let i = 1; i < sortedPoints.length - 1; i++) {
+        indices.push(0, i, i + 1);
+    }
+    
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    
+    const colorNum = parseInt(color.replace('#', ''), 16);
+    
+    // SỬ DỤNG MATERIAL TỐT HƠN:
+    const material = new THREE.MeshStandardMaterial({
+        color: colorNum,
+        transparent: true,
+        opacity: 0.6,  // Tăng độ mờ lên một chút để dễ nhìn thấy
+        side: THREE.DoubleSide,
+        depthWrite: true,
+        depthTest: true
+    });
+    
+    const plane = new THREE.Mesh(geometry, material);
+    plane.userData = {
+        type: 'coloredPlane',
+        points: pointNames,
+        color: color
+    };
+    
+    // THÊM RENDER ORDER ĐỂ ĐẢM BẢO HIỂN THỊ ĐÚNG
+    plane.renderOrder = 1;
+    
+    scene.add(plane);
+    coloredPlanes.push(plane);
+    
+    return true;
+}
+        
 
         // ========== HÀM CHO LƯU VÀ TẢI HÌNH (MỚI THÊM) ==========
 
