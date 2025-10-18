@@ -1672,32 +1672,37 @@
             });
         }
 
-        // Hàm tạo mặt phẳng có thể chọn được (không màu ban đầu)
-        function createSelectablePlane(vertices, planeName) {
-            const geometry = new THREE.BufferGeometry();
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-            geometry.setIndex([0, 1, 2, 0, 2, 3]);
-            geometry.computeVertexNormals();
-            
-            const material = new THREE.MeshBasicMaterial({
-                color: 0xffffff, // Màu trắng (không màu)
-                transparent: true,
-                opacity: 0.0,    // Hoàn toàn trong suốt ban đầu
-                side: THREE.DoubleSide
-            });
-            
-            const plane = new THREE.Mesh(geometry, material);
-            plane.userData = { 
-                type: 'plane', 
-                name: planeName,
-                selectable: true,
-                originalColor: 0xffffff,
-                isSelected: false,
-                isColored: false // Đánh dấu chưa được tô màu
-            };
-            
-            return plane;
-        }
+     // Trong hàm createSelectablePlane - SỬA THÀNH:
+function createSelectablePlane(vertices, planeName) {
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setIndex([0, 1, 2, 0, 2, 3]);
+    geometry.computeVertexNormals();
+    
+    const material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.0,
+        side: THREE.DoubleSide,
+        depthWrite: false  // QUAN TRỌNG: Thêm dòng này
+    });
+    
+    const plane = new THREE.Mesh(geometry, material);
+    plane.userData = { 
+        type: 'plane', 
+        name: planeName,
+        selectable: true,
+        originalColor: 0xffffff,
+        isSelected: false,
+        isColored: false
+    };
+    
+    return plane;
+}
+
+// Trong các hàm tạo mặt phẳng khác (createPlanesForCuboid, createPlanesForTetrahedron, etc)
+// Cũng thêm depthWrite: false vào material
+        
 
         // Hàm tạo các mặt phẳng cho hình hộp chữ nhật
         function createPlanesForCuboid(cuboid) {
@@ -2023,44 +2028,51 @@
             }
         }
 
-        // Hàm xóa hình khối (SỬA ĐỔI: KHÔNG xóa các mặt phẳng in đậm)
-        function deleteMesh(mesh) {
-            if (!mesh) return;
-            
-            scene.remove(mesh);
-            
-            const index = createdModels.indexOf(mesh);
-            if (index > -1) {
-                createdModels.splice(index, 1);
-            }
-            
-            Object.keys(points).forEach(key => {
-                delete points[key];
-            });
-            
-            pointObjects.forEach(obj => {
-                scene.remove(obj);
-            });
-            pointObjects.length = 0;
-            
-            edgeObjects.forEach(obj => {
-                scene.remove(obj);
-            });
-            edgeObjects.length = 0;
-            
-            planeObjects.forEach(obj => {
-                scene.remove(obj);
-            });
-            planeObjects.length = 0;
-            
-            updateLeftPanel(null);
-            
-            if (selectedMesh === mesh) {
-                deselectMesh();
-            }
-            
-            showInfo('Đã xóa hình khối.');
-        }
+      // SỬA HÀM deleteMesh - CHỈ XÓA MẶT PHẲNG KHÔNG TÔ MÀU:
+function deleteMesh(mesh) {
+    if (!mesh) return;
+    
+    scene.remove(mesh);
+    
+    const index = createdModels.indexOf(mesh);
+    if (index > -1) {
+        createdModels.splice(index, 1);
+    }
+    
+    Object.keys(points).forEach(key => {
+        delete points[key];
+    });
+    
+    pointObjects.forEach(obj => {
+        scene.remove(obj);
+    });
+    pointObjects.length = 0;
+    
+    edgeObjects.forEach(obj => {
+        scene.remove(obj);
+    });
+    edgeObjects.length = 0;
+    
+    // CHỈ XÓA MẶT PHẲNG KHÔNG TÔ MÀU, GIỮ LẠI MẶT PHẲNG ĐÃ TÔ MÀU
+    planeObjects.forEach(obj => {
+        scene.remove(obj);
+    });
+    planeObjects.length = 0;
+    
+    // KHÔNG xóa coloredPlanes ở đây - giữ lại các mặt phẳng đã tô màu
+    // coloredPlanes.forEach(obj => {
+    //     scene.remove(obj);
+    // });
+    // coloredPlanes.length = 0;
+    
+    updateLeftPanel(null);
+    
+    if (selectedMesh === mesh) {
+        deselectMesh();
+    }
+    
+    showInfo('Đã xóa hình khối.');
+}
 
         // Hàm cập nhật panel bên trái với thông tin hình khối
         function updateLeftPanel(mesh) {
