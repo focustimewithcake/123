@@ -1020,6 +1020,9 @@
             canvas: canvas,
             alpha: true
         });
+        renderer.sortObjects = true;
+        renderer.autoClear = true;
+        
         renderer.setSize(canvas.clientWidth, canvas.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -2901,6 +2904,9 @@ function colorPlane(pointNames, color) {
         depthWrite: false,
         depthTest: true
     });
+    material.polygonOffset = true;
+    material.polygonOffsetFactor = -1;
+    material.polygonOffsetUnits = -4;
     
     const plane = new THREE.Mesh(geometry, material);
     plane.userData = {
